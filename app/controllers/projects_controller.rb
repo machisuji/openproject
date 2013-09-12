@@ -106,6 +106,7 @@ class ProjectsController < ApplicationController
   end
 
   def copy
+    @source_project = @project
     UserMailer.with_deliveries(params[:notifications] == '1') do
       @project = Project.new
       @project.safe_attributes = params[:project]
@@ -114,12 +115,12 @@ class ProjectsController < ApplicationController
         @project.set_allowed_parent!(params[:project]['parent_id']) if params[:project].has_key?('parent_id')
         flash[:notice] = l(:notice_successful_create)
         redirect_to :controller => '/projects', :action => 'settings', :id => @project
-      elsif !@project.new_record?
+      elsif !@project.valid?
         # Project was created
         # But some objects were not copied due to validation failures
         # (eg. issues from disabled types)
         # TODO: inform about that
-        redirect_to :controller => '/projects', :action => 'settings', :id => @project
+        redirect_to :back
       end
     end
   rescue ActiveRecord::RecordNotFound
