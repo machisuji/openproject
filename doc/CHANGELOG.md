@@ -29,7 +29,7 @@ See doc/COPYRIGHT.rdoc for more details.
 
 # Changelog
 
-*         Fix APIv2 for planning elements (https://github.com/opf/openproject/pull/485)
+* `#2297` Fix APIv2 for planning elements (https://github.com/opf/openproject/pull/485)
 
 ## 3.0.0pre20
 
