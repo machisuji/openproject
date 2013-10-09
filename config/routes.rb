@@ -95,6 +95,8 @@ OpenProject::Application.routes.draw do
         resources :statuses, :only => [:index, :show]
       end
 
+      resources :custom_fields
+
     end
   end
 
