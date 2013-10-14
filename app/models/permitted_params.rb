@@ -228,7 +228,11 @@ class PermittedParams < Struct.new(:params, :user)
                                                       :planning_element_status_comment,
                                                       :planning_element_status_id,
                                                       :parent_id,
-                                                      :responsible_id
+                                                      :responsible_id,
+                                                      :custom_fields => [
+                                                                          :id,
+                                                                          :value
+                                                                        ]
                                                     ],
                                :planning_element_type => [
                                                            :name,

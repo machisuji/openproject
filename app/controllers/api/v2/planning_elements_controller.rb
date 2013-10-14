@@ -59,12 +59,14 @@ module Api
       end
 
       def create
-        planning_element_params = permitted_params.planning_element.tap do |p|
-          # map the old planning_element_type_id on the type_id of workpackage
-          p[:type_id] = p[:planning_element_type_id]
-          # and remove it from the params
-          p.except!(:planning_element_type_id)
-        end
+        # map the old planning_element_type_id on the type_id of workpackage
+        planning_element_params = Hash[permitted_params.planning_element.map do |key, value|
+          if key.to_s == "planning_element_type_id"
+            [:type_id, value]
+          else
+            [key, value]
+          end
+        end]
 
         @planning_element = planning_element_scope.new(planning_element_params)
 
