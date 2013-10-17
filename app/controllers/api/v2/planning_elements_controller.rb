@@ -45,7 +45,6 @@ module Api
       before_filter :find_all_projects_by_project_id, :only => :index
 
       helper :timelines
-      helper :timelines_journals
 
       accept_key_auth :index, :create, :show, :update, :destroy
 
@@ -59,16 +58,7 @@ module Api
       end
 
       def create
-        # map the old planning_element_type_id on the type_id of workpackage
-        planning_element_params = Hash[permitted_params.planning_element.map do |key, value|
-          if key.to_s == "planning_element_type_id"
-            [:type_id, value]
-          else
-            [key, value]
-          end
-        end]
-
-        @planning_element = planning_element_scope.new(planning_element_params)
+        @planning_element = planning_element_scope.new(permitted_params.planning_element)
 
         # The planning_element inherits from workpackage, which requires an author.
         # Using the current_user also satisfies this demand for API-calls
@@ -76,7 +66,6 @@ module Api
         successfully_created = @planning_element.save
 
         respond_to do |format|
-
           format.api do
             if successfully_created
               redirect_url = api_v2_project_planning_element_url(
@@ -171,13 +160,30 @@ module Api
 
       # is called as a before filter and as a method
       def assign_planning_elements(projects = (@projects || [@project]))
-        @planning_elements = WorkPackage.for_projects(projects).without_deleted
 
-        query = Query.new
-        query.add_filters(params[:f], params[:op], params[:v]) if params[:f]
+        @planning_elements = if params[:at_time]
+                               historical_work_packages(projects)
+                             else
+                               current_work_packages(projects)
+                             end
+      end
 
-        @planning_elements = @planning_elements.with_query query
+      def current_work_packages(projects)
+        work_packages = WorkPackage.for_projects(projects).without_deleted
 
+        if params[:f]
+          query = Query.new
+          query.add_filters(params[:f], params[:op], params[:v])
+          work_packages = work_packages.with_query query
+        end
+
+        work_packages
+      end
+
+      def historical_work_packages(projects)
+        at_time = Time.at(params[:at_time].to_i).to_datetime
+        filter = params[:f] ? {f: params[:f], op: params[:op], v: params[:v]}: {}
+        historical = PlanningComparisonService.compare(projects, at_time, filter)
       end
 
       # remove this and replace by calls it with calls
@@ -207,12 +213,9 @@ module Api
       end
 
       def optimize_planning_elements_for_less_db_queries
-        # abort if @planning_elements is already an array, using .class check since
-        # .is_a? acts weird on named scopes
-        return if @planning_elements.class == Array
-
         # triggering full load to avoid separate queries for count or related models
-        @planning_elements = @planning_elements.all(:include => [:type, :status, :project])
+        # historical packages are already loaded correctly and only need to be optimised, so they do not need to fetched again, only optimised
+        @planning_elements = @planning_elements.all(:include => [:type, :status, :project, :responsible]) unless @planning_elements.class == Array
 
         # Replacing association proxies with already loaded instances to avoid
         # further db calls.

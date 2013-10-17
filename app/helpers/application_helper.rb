@@ -175,7 +175,7 @@ module ApplicationHelper
     link = ''
 
     if show_icon && User.current.member_of?(project)
-      link << image_tag('fav.png', :alt => l(:description_my_project), :title => l(:description_my_project))
+      link << image_tag('webalys/fav.png', :alt => l(:description_my_project), :title => l(:description_my_project))
     end
 
     if project.active?
@@ -257,9 +257,17 @@ module ApplicationHelper
   # Renders flash messages
   def render_flash_messages
     if User.current.impaired?
-      flash.map { |k,v| content_tag('div', content_tag('a', v, :href => 'javascript:;'), :class => "flash #{k}") }.join.html_safe
+      flash.map { |k,v| content_tag('div', content_tag('a', join_flash_messages(v), :href => 'javascript:;'), :class => "flash #{k}") }.join.html_safe
     else
-      flash.map { |k,v| content_tag('div', v, :class => "flash #{k}") }.join.html_safe
+      flash.map { |k,v| content_tag('div', join_flash_messages(v), :class => "flash #{k}") }.join.html_safe
+    end
+  end
+
+  def join_flash_messages(messages)
+    if messages.respond_to?(:join)
+      messages.join('<br />').html_safe 
+    else
+      messages
     end
   end
 
@@ -905,7 +913,7 @@ module ApplicationHelper
 
   def checked_image(checked=true)
     if checked
-      image_tag('check.png', :alt => l(:label_checked), :title => l(:label_checked))
+      image_tag('webalys/check.png', :alt => l(:label_checked), :title => l(:label_checked))
     end
   end
 
@@ -947,12 +955,12 @@ module ApplicationHelper
       ret += content_tag :ul do
 		    args[:collection].collect do |(s, name)|
           content_tag :li do
-            context_menu_link (name || s), bulk_update_issues_path(:ids => args[:updated_object_ids],
-                                                                   :issue => { db_attribute => s },
-                                                                   :back_url => args[:back_url]),
-                                      :method => :put,
-		                                  :selected => args[:selected].call(s),
-                                      :disabled => args[:disabled].call(s)
+            context_menu_link (name || s), work_package_bulk_update_path(:ids => args[:updated_object_ids],
+                                                                         :work_package => { db_attribute => s },
+                                                                         :back_url => args[:back_url]),
+                                                                         :method => :put,
+                                                                         :selected => args[:selected].call(s),
+                                                                         :disabled => args[:disabled].call(s)
           end
         end.join.html_safe
       end

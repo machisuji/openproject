@@ -29,11 +29,43 @@ See doc/COPYRIGHT.rdoc for more details.
 
 # Changelog
 
-## 3.0.0pre20
+* `#1348` User status has no database index
+* `#1854` Breadcrumbs arrows missing in Chrome
+* `#1991` Migrate text references to issues/planning elements
+* `#2297` Fix APIv2 for planning elements
+* `#2304` Introduce keyboard shortcuts
+* `#2334` Deselecting all types in project configuration creates 500
+* `#2336` Cukes for timelines start/end date comparison
+* `#2340` Develop migration mechanism for renamed plugins
+* `#2383` [Performance] planning_elements_controller still has an n+1-query for the responsible
+* `#2384` Replace bundles svg graph with gem
+* `#2386` Remove timelines_journals_helper
+* `#2418` Migrate to RABL
+* Allow using environment variables instead of configuration.yml
+
+## 3.0.0pre21
 
 * `#1281` I18n.js Not working correctly. Always returns English Translations
+* `#1758` Migrate functional-tests for issues into specs for work package
+* `#1771` Fixed bug: Refactor Types Project Settings into new Tab
+* `#1880` Re-introduce at-time scope
+* `#1881` Re-introduce project planning comparison in controller
+* `#1883` Extend at-time scope for status comparison
+* `#1884` Make status values available over API
+* `#1994` Integrational tests for work packages at_time (API)
+* `#2070` Settle copyright for images
+* `#2158` Work Package General Setting
+* `#2173` Adapt client-side to new server behavior
+* `#2306` Migrate issues controller tests
+* `#2307` Change icon of home button in header from OpenProjct icon to house icon
+* `#2310` Add proper indices to work_package
+* `#2319` Add a request-store to avoid redundant calls
+
+## 3.0.0pre20
+
 * `#1560` WorkPackage/update does not retain some fields when validations fail
 * `#1771` Refactor Types Project Settings into new Tab
+* `#1878` Project Plan Comparison(server-side implementation): api/v2 can now resolve historical data for work_packages
 * `#1929` Too many lines in work package view
 * `#1946` Modal shown within in Modal
 * `#1949` External links within modals do not work

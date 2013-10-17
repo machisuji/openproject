@@ -593,7 +593,7 @@ en:
   label_boolean: "Boolean"
   label_branch: "Branch"
   label_browse: "Browse"
-  label_bulk_edit_selected_issues: "Bulk edit selected issues"
+  label_bulk_edit_selected_work_packages: "Bulk edit selected work packages"
   label_calendar: "Calendar"
   label_calendar_show: "Show Calendar"
   label_category: "Category"
@@ -955,6 +955,21 @@ en:
     zero: "no projects"
   label_year: "Year"
   label_yesterday: "yesterday"
+  label_keyboard_shortcut_help_heading: "Available Keyboard Shortcuts"
+  label_keyboard_shortcut_within_project: "Project related shortcuts:"
+  label_keyboard_shortcut_global_shortcuts: "Global shortcuts:"
+  label_keyboard_shortcut_search_global: "Global search"
+  label_keyboard_shortcut_search_project: "Find a project"
+  label_keyboard_shortcut_go_my_page: "Go to My Page"
+  label_keyboard_shortcut_show_help: "Show this help message"
+  label_keyboard_shortcut_go_overview: "Go to project overview"
+  label_keyboard_shortcut_go_work_package: "Go to project work packages"
+  label_keyboard_shortcut_go_wiki: "Go to project wiki"
+  label_keyboard_shortcut_go_activity: "Go to project activities"
+  label_keyboard_shortcut_go_calendar: "Go to project calendar"
+  label_keyboard_shortcut_go_news: "Go to project news"
+  label_keyboard_shortcut_go_timelines: "Go to timelines"
+  label_keyboard_shortcut_new_work_package: "Create new work package"
 
   mail_body_account_activation_request: "A new user (%{value}) has registered. The account is pending your approval:"
   mail_body_account_information: "Your account information"
@@ -1012,13 +1027,11 @@ en:
   notice_to_many_principals_to_display: "There are too many results.\nNarrow down the search by typing in the name of the new member (or group)."
   notice_unable_delete_time_entry: "Unable to delete time log entry."
   notice_unable_delete_version: "Unable to delete version."
+  notice_automatic_set_of_standard_type: "Set standard type automatically."
+  error_types_in_use_by_work_packages: "The following types are still referenced by work packages: %{types}"
 
   # Default format for numbers
   number:
-
-
-
-
     format:
       delimiter: ""
       precision: 3
@@ -1340,7 +1353,7 @@ en:
         default: "default"
       column:
         type: "Type"
-        end_date: "End date"
+        due_date: "End date"
         name: "Name"
         status: "Status"
         responsible: "Responsible"
