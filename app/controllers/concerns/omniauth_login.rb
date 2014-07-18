@@ -1,6 +1,6 @@
 ##
 # Intended to be used by the AccountController to handle omniauth logins
-module OmniauthLogin
+module Concerns::OmniauthLogin
   def self.included(base)
     # disable CSRF protection since that should be covered by the omniauth strategy
     base.skip_before_filter :verify_authenticity_token, :only => [:omniauth_login]
