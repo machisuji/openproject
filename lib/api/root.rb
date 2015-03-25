@@ -61,13 +61,19 @@ module API
 
     helpers do
       def current_user
-        return User.current if running_in_test_env?
-        user_id = env['rack.session']['user_id']
-        User.current = user_id ? User.find(user_id) : User.anonymous
+        User.current
+      end
+
+      def warden
+        env['warden']
       end
 
       def authenticate
-        if Setting.login_required? && (current_user.nil? || current_user.anonymous?)
+        warden.authenticate!
+
+        User.current = warden.user
+
+        if Setting.login_required? && (current_user.nil? || (!current_user.admin? && current_user.anonymous?))
           raise API::Errors::Unauthenticated
         end
       end
@@ -146,13 +152,12 @@ module API
 
     # run authentication before each request
     before do
-      # Call current_user as it sets User.current.
-      # Not doing this might cause devs to use User.current without that value
-      # being set to the actually current user. That might result in standard
-      # users becoming admins and otherwise based on who called the ruby
-      # process last.
-      current_user
       authenticate
+    end
+
+    use Warden::Manager do |manager|
+      manager.default_strategies :basic_auth, :session
+      manager.failure_app = lambda { |env| [401, {}, ['unauthorized']] }
     end
 
     version 'v3', using: :path do
