@@ -69,7 +69,7 @@ module API
       end
 
       def authenticate
-        warden.authenticate!
+        warden.authenticate! # scope: :api_v3
 
         User.current = warden.user
 
@@ -153,11 +153,6 @@ module API
     # run authentication before each request
     before do
       authenticate
-    end
-
-    use Warden::Manager do |manager|
-      manager.default_strategies :basic_auth, :session
-      manager.failure_app = lambda { |env| [401, {}, ['unauthorized']] }
     end
 
     version 'v3', using: :path do
