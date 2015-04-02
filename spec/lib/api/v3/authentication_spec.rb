@@ -52,17 +52,7 @@ describe API::V3, type: :request do
       end
     end
 
-    context 'with invalid credentials' do
-      before do
-        get resource, {}, basic_auth('hans', 'wrongpassword')
-      end
-
-      it 'should return 401 unauthorized' do
-        expect(response.status).to eq 401
-      end
-    end
-
-    context 'with valid credentials' do
+    context 'with credentials' do
       before do
         api_v3 = {
           'master_account' => {
@@ -71,12 +61,26 @@ describe API::V3, type: :request do
           }
         }
         OpenProject::Configuration['api_v3'] = api_v3
-
-        get resource, {}, basic_auth('root', 'toor')
       end
 
-      it 'should return 200 OK' do
-        expect(response.status).to eq 200
+      context 'with invalid credentials' do
+        before do
+          get resource, {}, basic_auth('hans', 'wrongpassword')
+        end
+
+        it 'should return 401 unauthorized' do
+          expect(response.status).to eq 401
+        end
+      end
+
+      context 'with valid credentials' do
+        before do
+          get resource, {}, basic_auth('root', 'toor')
+        end
+
+        it 'should return 200 OK' do
+          expect(response.status).to eq 200
+        end
       end
     end
   end
