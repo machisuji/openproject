@@ -29,7 +29,103 @@
 require 'spec_helper'
 
 describe API::V3, type: :request do
+
+  before do
+    Setting.login_required = 1
+  end
+
+  before do
+    api_v3 = {
+      'basic_auth' => {
+        'user' => 'root',
+        'password' => 'toor'
+      }
+    }
+    OpenProject::Configuration['api_v3'] = api_v3
+  end
+
+  def basic_auth(user, password)
+    credentials = ActionController::HttpAuthentication::Basic.encode_credentials user, password
+    {'HTTP_AUTHORIZATION' => credentials}
+  end
+
+  describe 'session' do
+    let(:user) { FactoryGirl.create :user }
+
+    context 'web' do
+      it 'redirects unless logged in' do
+        get '/my/page'
+        expect(response.status).to eq 302
+      end
+
+      it 'shows page when logged in' do
+        as_logged_in_user(user) do
+          get '/my/page'
+        end
+        expect(response.status).to eq 200
+      end
+    end
+
+    context 'api' do
+      let(:resource) { "/api/v3/users/#{user.id}"}
+
+      it 'refuses request without a session' do
+        get resource
+        expect(response.status).to eq 401
+      end
+
+      # allow api requests via session without basic auth
+      xit 'serves the request when logged in' do
+        as_logged_in_user(user) do
+          get resource
+        end
+        expect(response.status).to eq 200
+      end
+
+      # no session
+
+      context 'basic auth provided without session' do
+        it 'wrong creds' do
+          get resource, {}, basic_auth('root', 'wrrong')
+          expect(response.status).to eq 401
+        end
+
+        it 'correct creds' do
+          get resource, {}, basic_auth('root', 'toor')
+          expect(response.status).to eq 200
+          expect(User.current).to eq User.system # wichtig
+        end
+      end
+
+      # without session
+
+      context 'basic auth provided with session' do
+        it 'wrong creds' do
+          as_logged_in_user(user) do
+            get resource, {}, basic_auth('root', 'wrrong')
+          end
+
+          expect(response.status).to eq 401
+        end
+
+        # todo, returns bob user, statt system
+        xit 'correct creds' do
+          as_logged_in_user(user) do
+            get resource, {}, basic_auth('root', 'toor')
+          end
+
+          expect(response.status).to eq 200
+          expect(User.current).to eq User.system # wichtig
+          expect(request.env['warden'].user).to eq User.system # wichtig
+        end
+      end
+    end
+  end
+
   describe 'basic auth' do
+
+    # register basic auth strategy
+
     let(:user) { FactoryGirl.create :user }
     let(:resource) { "/api/v3/users/#{user.id}"}
 
@@ -55,7 +151,7 @@ describe API::V3, type: :request do
     context 'with credentials' do
       before do
         api_v3 = {
-          'master_account' => {
+          'basic_auth' => {
             'user' => 'root',
             'password' => 'toor'
           }
@@ -81,6 +177,25 @@ describe API::V3, type: :request do
         it 'should return 200 OK' do
           expect(response.status).to eq 200
         end
+      end
+    end
+
+    context 'missing config' do
+      before do
+        OpenProject::Configuration['api_v3'] = nil
+      end
+
+      it 'refuses request without a session' do
+        get resource
+        expect(response.status).to eq 401
+      end
+
+      # allow api requests via session without basic auth
+      xit 'serves the request when logged in' do
+        as_logged_in_user(user) do
+          get resource
+        end
+        expect(response.status).to eq 200
       end
     end
   end

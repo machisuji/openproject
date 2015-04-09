@@ -52,6 +52,29 @@ module API
       end
     end
 
+    http_basic do |username, password|
+      basic_auth = Hash(OpenProject::Configuration['api_v3'])['basic_auth']
+
+      # only do stuff if basic auth is configured
+      if basic_auth
+        # pw matches?
+        if username == Hash(basic_auth)['user'] && password == Hash(basic_auth)['password']
+          user = User.system
+          user.admin = true
+
+          # set user for openproject
+          User.current = user
+
+          true
+        else
+          false
+        end
+      else
+        # we fall back to true as this is the old behaviour
+        true
+      end
+    end
+
     content_type 'hal+json', 'application/hal+json; charset=utf-8'
     content_type :json,      'application/json; charset=utf-8'
     format 'hal+json'
@@ -61,19 +84,28 @@ module API
 
     helpers do
       def current_user
+        if env['rack.session'] && env['rack.session']['user_id']
+          user_id = env['rack.session']['user_id']
+          User.current = user_id ? User.find(user_id) : User.anonymous
+        end
+
         User.current
       end
 
-      def warden
-        env['warden']
-      end
+      # def warden
+      #   env['warden']
+      # end
 
       def authenticate
-        warden.authenticate! # scope: :api_v3
 
-        User.current = warden.user
-
-        if Setting.login_required? && (current_user.nil? || (!current_user.admin? && current_user.anonymous?))
+        #
+        # warden.authenticate! # scope: :api_v3
+        #
+        # User.current = warden.user
+        #
+        # if Setting.login_required? && (current_user.nil? || (!current_user.admin? && current_user.anonymous?))
+        #
+        if Setting.login_required? && (current_user.nil? ||  (!current_user.admin? && current_user.anonymous?))
           raise API::Errors::Unauthenticated
         end
       end
@@ -152,6 +184,7 @@ module API
 
     # run authentication before each request
     before do
+      current_user
       authenticate
     end
 

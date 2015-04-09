@@ -270,6 +270,11 @@ default:
   # generated and sent to the user who then has to change their password upon login.
   disable_password_choice: false
 
+  # api_v3:
+  #   basic_auth:
+  #     user:
+  #     password:
+
 # specific configuration options for production environment
 # that overrides the default ones
 # production:

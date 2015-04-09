@@ -84,11 +84,6 @@ module OpenProject
 
     config.middleware.use Rack::Attack
 
-    require 'open_project/authentication/manager'
-    config.middleware.use Warden::Manager do |config|
-      OpenProject::Authentication::Manager.configure(config)
-    end
-
     # Custom directories with classes and modules you want to be autoloadable.
     # config.autoload_paths += %W(#{config.root}/extras)
     config.autoload_paths << Rails.root.join('lib')

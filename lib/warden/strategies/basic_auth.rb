@@ -33,7 +33,7 @@ module Warden
       end
 
       def config
-        Hash(OpenProject::Configuration['api_v3'])['master_account']
+        Hash(OpenProject::Configuration['api_v3'])['basic_auth']
       end
     end
   end
