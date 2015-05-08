@@ -22,3 +22,5 @@ include OpenProject::Authentication::Scope
 OpenProject::Authentication.update_strategies(API_V3) do |_strategies|
   [:global_basic_auth, :user_basic_auth, :basic_auth_failure, :session]
 end
+
+Rails.configuration.middleware.use OpenProject::Authentication::Manager

@@ -63,8 +63,6 @@ module API
 
     parser :json, Parser.new
 
-    use OpenProject::Authentication::Manager
-
     helpers do
       def current_user
         User.current
