@@ -33,7 +33,7 @@ require 'uri'
 module Concerns::OmniauthLogin
   def self.included(base)
     # disable CSRF protection since that should be covered by the omniauth strategy
-    base.skip_before_filter :verify_authenticity_token, only: [:omniauth_login]
+    base.skip_before_filter :verify_authenticity_token, only: [:omniauth_login, :omniauth_failure]
   end
 
   def omniauth_login
@@ -86,11 +86,14 @@ module Concerns::OmniauthLogin
     if user.new_record?
       create_user_from_omniauth user, auth_hash
     else
-      if user.active?
-        user.log_successful_login
-        OpenProject::OmniAuth::Authorization.after_login! user, auth_hash, self
+      begin
+        login_user_if_active(user)
+      ensure
+        if user.active?
+          user.log_successful_login
+          OpenProject::OmniAuth::Authorization.after_login! user, auth_hash, self
+        end
       end
-      login_user_if_active(user)
     end
   end
 
