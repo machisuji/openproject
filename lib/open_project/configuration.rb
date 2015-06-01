@@ -55,6 +55,7 @@ module OpenProject
       'cache_memcache_server'   => nil,
       # where to store session data
       'session_store'           => :cache_store,
+      'session_key'             => '_open_project_session',
       # url-path prefix
       'rails_relative_url_root' => '',
       'rails_force_ssl' => false,
