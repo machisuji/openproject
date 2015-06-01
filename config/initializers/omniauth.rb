@@ -31,3 +31,5 @@ Rails.application.config.middleware.use OmniAuth::Builder do
     provider :developer, fields: [:first_name, :last_name, :email]
   end
 end
+
+OmniAuth.config.on_failure = OpenProject::OmniAuth::FailureEndpoint
