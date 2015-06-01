@@ -205,6 +205,10 @@ default:
   # possible values are :cookie_store, :cache_store, :active_record_store
   session_store: :cache_store
 
+  # Defines the key under which the OpenProject session is stored
+  # in the configured session store.
+  session_key: _open_project_session
+
   # define your airbrake api key. optionally provide a different host and port
   # to connect to a different backend (e.g. a self-hosted errbit)
   # airbrake:
