@@ -110,7 +110,7 @@ describe OpenProject::Configuration do
     }
 
     before do
-      stub_const('OpenProject::Configuration::ENV_PREFIX', 'OPTEST')
+      allow(OpenProject::Configuration).to receive(:env_prefix).and_return('OPTEST')
 
       OpenProject::Configuration.send :override_config!, config, env_vars
     end

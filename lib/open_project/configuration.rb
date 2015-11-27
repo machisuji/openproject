@@ -33,7 +33,7 @@ module OpenProject
   module Configuration
     extend Helpers
 
-    ENV_PREFIX = 'OPENPROJECT_'
+    mattr_accessor(:env_prefix) { 'OPENPROJECT_' }
 
     # Configuration default values
     @defaults = {
@@ -119,7 +119,7 @@ module OpenProject
         config.deep_merge! merge_config(config, source)
       end
 
-      def merge_config(config, source, prefix: ENV_PREFIX)
+      def merge_config(config, source, prefix: env_prefix)
         new_config = config.dup.with_indifferent_access
 
         source.select { |k, _| k =~ /^#{prefix}/i }.each do |k, value|
