@@ -132,7 +132,7 @@ module WorkPackagesHelper
              link_text = [hidden_link, link].reject(&:empty?).join('')
 
              html_link = link_to(link_text.html_safe,
-                                 work_package_path(package),
+                                 work_package_url(package, only_path: true),
                                  title: title,
                                  class: css_class)
 
