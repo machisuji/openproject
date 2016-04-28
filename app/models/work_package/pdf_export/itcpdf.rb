@@ -27,14 +27,14 @@
 # See doc/COPYRIGHT.rdoc for more details.
 #++
 
-require 'tcpdf'
+class WorkPackage::PdfExport::ITCPDF
 
-class WorkPackage::PdfExport::ITCPDF < TCPDF
+  include Prawn::View
   include Redmine::I18n
+
   attr_accessor :footer_date
 
   def initialize(lang)
-    super()
     set_language_if_valid lang
     @font_for_content = 'FreeSans'
     @font_for_footer  = 'FreeSans'

@@ -27,21 +27,47 @@
 # See doc/COPYRIGHT.rdoc for more details.
 #++
 
-require 'rfpdf/fpdf'
+class WorkPackage::PdfExport::IFPDF
 
-class WorkPackage::PdfExport::IFPDF < FPDF
+  include Prawn::View
   include Redmine::I18n
-  attr_accessor :footer_date
+
+  attr_accessor :footer_date, :footer_font, :content_font, :default_font_size
 
   def initialize(lang)
-    super()
     set_language_if_valid lang
 
-    @font_for_content = 'Arial'
-    @font_for_footer  = 'Helvetica'
+    @content_font = 'Times-Roman'
+    @footer_font  = 'Helvetica'
+    @defaulf_font_size = 9
+  end
 
-    SetCreator(OpenProject::Info.app_name)
-    SetFont(@font_for_content)
+  def content(&block)
+    font name: content_font
+    instance_eval &block
+  end
+
+  def options
+    @options ||= {
+      Creator: OpenProject::Info.app_name,
+      CreationDate: Time.now
+    }
+  end
+
+  def document
+    @document ||= Prawn::Document.new options
+  end
+
+  def title=(title)
+    options[:Title] = title
+  end
+
+  def font(name: document.font.name, style: nil, size: nil)
+    font_opts = {}
+    font_opts[:style] = style if style
+
+    document.font content_font, font_opts
+    document.font_size size if size
   end
 
   def SetFontStyle(style, size)
@@ -100,5 +126,5 @@ class WorkPackage::PdfExport::IFPDF < FPDF
     SetX(-30)
     RDMCell(0, 5, PageNo().to_s + '/{nb}', 0, 0, 'C')
   end
-  alias alias_nb_pages AliasNbPages
+  # alias alias_nb_pages AliasNbPages
 end
