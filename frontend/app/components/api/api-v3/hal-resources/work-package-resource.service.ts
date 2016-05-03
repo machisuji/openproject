@@ -38,26 +38,17 @@ class WorkPackageResource extends HalResource {
   public schema;
   public id;
 
-  public static fromCreateForm(projectIdentifier?:string):ng.IPromise<WorkPackageResource> {
-    var deferred = $q.defer();
+  public static fromCreateForm(form: op.WorkPackageForm) {
+    var wp = new WorkPackageResource(form.payload.$plain(), true);
 
-    apiWorkPackages.emptyCreateForm(projectIdentifier)
-      .then(resource => {
-        var wp = new WorkPackageResource(resource.payload.$source, true);
+    // Copy resources from form response
+    wp.schema = form.schema;
+    wp.form = $q.when(form);
+    wp.id = 'new-' + Date.now();
 
-        // Copy resources from form response
-        wp.schema = resource.schema;
-        wp.form = $q.when(resource);
-        wp.id = 'new-' + Date.now();
-
-        // Set update link to form
-        wp.$links.update = resource.$links.self;
-
-        deferred.resolve(wp);
-      })
-      .catch(deferred.reject);
-
-    return deferred.promise;
+    // Set update link to form
+    wp.$links.update = resource.$links.self;
+    return wp;
   }
 
   public get isNew():boolean {
