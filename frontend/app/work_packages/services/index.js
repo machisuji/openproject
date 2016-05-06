@@ -30,7 +30,7 @@ angular.module('openproject.workPackages.services')
   .constant('WORK_PACKAGE_ATTRIBUTES', [
     {
       groupName: 'details',
-      attributes: ['type', 'status', 'percentageDone', 'date', 'priority', 'version', 'category']
+      attributes: ['project', 'type', 'status', 'percentageDone', 'date', 'priority', 'version', 'category']
     },
     {
       groupName: 'people',
