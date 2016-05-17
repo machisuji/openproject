@@ -2,9 +2,10 @@ class WorkPackageField
   include Capybara::DSL
   include RSpec::Matchers
 
-  attr_reader :element
+  attr_reader :page, :element
 
   def initialize(page, property_name, selector = nil)
+    @page = page
     @property_name = property_name
 
     if selector.nil?
@@ -48,7 +49,15 @@ class WorkPackageField
   end
 
   def input_element
-    @element.find input_selector
+    if custom_field?
+      custom_field_input
+    else
+      @element.find input_selector
+    end
+  end
+
+  def custom_field?
+    field_selector =~ /customField\d+$/
   end
 
   def submit_by_click
@@ -98,9 +107,20 @@ class WorkPackageField
   private
 
   def input_selector
-    selector = { :'start-date' => 'date-start',
-                 :'end-date' => 'date-end' }[@property_name] || @property_name
+    if custom_field?
+      ".inplace-edit--write-value"
+    else
+      selector = { :'start-date' => 'date-start',
+                   :'end-date' => 'date-end' }[@property_name] || @property_name
 
-    "#inplace-edit--write-value--#{selector}"
+      "#inplace-edit--write-value--#{selector}"
+    end
+  end
+
+  def custom_field_input
+    klass = field_selector.split(".").last
+
+    page
+      .find(:xpath, "//*[contains(@class, '#{klass}')]//*[contains(@title, ': Edit')]")
   end
 end

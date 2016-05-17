@@ -150,8 +150,32 @@ module Pages
       page.click_button(I18n.t('js.button_edit'))
     end
 
+    def trigger_edit_comment
+      add_comment_container.find('.inplace-editing--trigger-link').click
+    end
+
+    def update_comment(comment)
+      add_comment_container.fill_in 'inplace-edit--write-value--activity', with: comment
+    end
+
+    def preview_comment
+      label = I18n.t('js.inplace.btn_preview_enable')
+      add_comment_container
+        .find(:xpath, "//button[@title='#{label}']")
+        .click
+    end
+
+    def save_comment
+      label = I18n.t('js.label_add_comment')
+      add_comment_container.find(:xpath, "//a[@title='#{label}']").click
+    end
+
     def save!
       page.click_button(I18n.t('js.button_save'))
+    end
+
+    def add_comment_container
+      find('.work-packages--activity--add-comment')
     end
 
     private

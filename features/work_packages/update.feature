@@ -74,15 +74,6 @@ Feature: Updating work packages
     And I am already logged in as "manager"
 
   @javascript
-  Scenario: User adds a comment to a work package with previewing the stuff before
-    When I go to the page of the issue "wp1"
-    And I click on the edit button
-    And I fill in a comment with "human horn"
-    And I preview the comment to be added and see "human horn"
-    And I submit the form by the "Save" button
-    And I should see the comment "human horn"
-
-  @javascript
   Scenario: On a work package with children a user should not be able to change attributes which are overridden by children
     And there are the following work packages in project "ecookbook":
       | subject | type   | status  | fixed_version | priority | done_ratio | estimated_hours | start_date | due_date   |
