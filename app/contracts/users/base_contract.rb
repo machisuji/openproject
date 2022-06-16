@@ -31,25 +31,25 @@ module Users
     include AssignableCustomFieldValues
 
     attribute :login,
-              writeable: ->(*) { user.allowed_to_globally?(:manage_user) && model.id != user.id }
+              writable: ->(*) { user.allowed_to_globally?(:manage_user) && model.id != user.id }
     attribute :firstname
     attribute :lastname
     attribute :mail
     attribute :admin,
-              writeable: ->(*) { user.admin? && model.id != user.id }
+              writable: ->(*) { user.admin? && model.id != user.id }
     attribute :language
 
     attribute :auth_source_id,
-              writeable: ->(*) { user.allowed_to_globally?(:manage_user) }
+              writable: ->(*) { user.allowed_to_globally?(:manage_user) }
 
     attribute :status,
-              writeable: ->(*) { user.allowed_to_globally?(:manage_user) }
+              writable: ->(*) { user.allowed_to_globally?(:manage_user) }
 
     attribute :identity_url,
-              writeable: ->(*) { user.admin? }
+              writable: ->(*) { user.admin? }
 
     attribute :force_password_change,
-              writeable: ->(*) { user.admin? }
+              writable: ->(*) { user.admin? }
 
     def self.model
       User
@@ -87,7 +87,7 @@ module Users
     end
 
     def existing_auth_source
-      if auth_source_id && AuthSource.find_by_unique(auth_source_id).nil?
+      if auth_source_id && AuthSource.find_by(unique: auth_source_id).nil?
         errors.add :auth_source, :error_not_found
       end
     end
