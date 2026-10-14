@@ -206,7 +206,21 @@ module Settings
         # Manually managed list with languages that have ~50+ translation ratio in Crowdin
         # https://crowdin.com/project/openproject
         default: %w[ca cs de el en es fr hu id it ja ko lt nl no pl pt-BR pt-PT ro ru sk sl sv tr uk vi zh-CN zh-TW].freeze,
-        allowed: -> { Redmine::I18n.all_languages }
+        allowed: -> { Redmine::I18n.all_languages },
+        ui: {
+          values: -> {
+            all_languages.map { translate_language(it) }.sort_by(&:first).map do |name, code|
+              if code == Setting.default_language
+                [t(:"settings.language_name_being_default", language_name: name), code,
+                 { label_arguments: { lang: code }, disabled: true, checked: true }]
+              else
+                [name, code, { label_arguments: { lang: code } }]
+              end
+            end
+          },
+          # The default language is always available, but its disabled check box is not submitted.
+          parse: ->(languages) { languages | [Setting.default_language] }
+        }
       },
       avatar_link_expiration_seconds: {
         description: "Cache duration for avatar image API responses",

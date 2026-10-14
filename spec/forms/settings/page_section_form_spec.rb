@@ -119,6 +119,18 @@ RSpec.describe Settings::PageSectionForm, type: :forms do
     end
   end
 
+  context "for the languages page" do
+    subject(:rendered_form) { render_section(Settings::Pages.fetch(:languages).sections.first) }
+
+    it "renders the available languages with the default one checked and disabled", :aggregate_failures do
+      expect(rendered_form).to have_field "settings[available_languages][]", type: :hidden, with: ""
+      expect(rendered_form).to have_field "English (default)", type: :checkbox, checked: true, disabled: true,
+                                                               fieldset: "Available languages"
+      expect(rendered_form).to have_element :label, text: "Español", lang: "es"
+      expect(rendered_form).to have_element :label, text: "简体中文", lang: "zh-CN"
+    end
+  end
+
   context "for the external links page" do
     subject(:rendered_form) do
       render_section(Settings::Pages.fetch(:external_links).sections.first,

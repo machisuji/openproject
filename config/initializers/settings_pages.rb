@@ -58,7 +58,7 @@ Settings::Pages.draw do
     setting :capture_external_links_require_login
   end
 
-  page :languages, menu_item: :settings_languages, custom: true do
+  page :languages, menu_item: :settings_languages, update_service: "Settings::LanguageUpdateService" do
     setting :available_languages
   end
 

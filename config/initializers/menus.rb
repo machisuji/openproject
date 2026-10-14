@@ -619,7 +619,7 @@ Redmine::MenuManager.map :admin_menu do |menu|
             parent: :settings
 
   menu.push :settings_languages,
-            { controller: "/admin/settings/languages_settings", action: :show },
+            { controller: "/admin/settings/pages", action: :show, settings_page: "languages" },
             if: ->(_) { User.current.admin? },
             caption: :label_languages,
             parent: :settings
