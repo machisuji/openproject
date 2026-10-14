@@ -918,7 +918,6 @@ Rails.application.routes.draw do
                  settings_page: settings_page.key.to_s
       end
 
-      resource :repositories, controller: "/admin/settings/repositories_settings", only: %i[show update]
       resource :experimental, controller: "/admin/settings/experimental_settings", only: %i[show update]
 
       resource :authentication, controller: "/admin/settings/authentication_settings", only: %i[show update]

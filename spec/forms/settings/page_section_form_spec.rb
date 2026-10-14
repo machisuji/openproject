@@ -140,6 +140,51 @@ RSpec.describe Settings::PageSectionForm, type: :forms do
     end
   end
 
+  context "for the general section of the repositories page" do
+    subject(:rendered_form) { render_page_section(:repositories, 0) }
+
+    it "renders a setting depending on a check box hidden while that one is unchecked", :aggregate_failures,
+       with_settings: { sys_api_enabled: false } do
+      expect(rendered_form).to have_field "Enable repository management web service", type: :checkbox do |field|
+        expect(field["data-show-when-checked-target"]).to eq "cause"
+        expect(field["data-target-name"]).to eq "sys_api_enabled"
+      end
+
+      expect(rendered_form).to have_field "API key", visible: :hidden
+      expect(rendered_form).to have_css("[data-show-when-checked-target='effect'][data-target-name='sys_api_enabled'][hidden]",
+                                        visible: :hidden)
+    end
+
+    it "shows a setting depending on a check box while that one is checked", with_settings: { sys_api_enabled: true } do
+      expect(rendered_form).to have_field "API key"
+    end
+
+    it "submits an empty selection of check box groups", :aggregate_failures do
+      expect(rendered_form).to have_field "settings[enabled_scm][]", type: :hidden, with: ""
+      expect(rendered_form).to have_field "Subversion", type: :checkbox, fieldset: "Enabled SCM"
+    end
+  end
+
+  context "for the checkout section of the repositories page" do
+    subject(:rendered_form) { render_page_section(:repositories, 1) }
+
+    it "renders the custom input" do
+      expect(rendered_form).to have_field "settings[repository_checkout_data][git][enabled]", type: :checkbox, visible: :all
+    end
+  end
+
+  context "for the commit messages section of the repositories page" do
+    subject(:rendered_form) { render_page_section(:repositories, 2) }
+
+    let!(:statuses) { [create(:status, name: "In Arbeit"), create(:status, name: "Fast fertig")] }
+    let!(:activity) { create(:time_entry_activity, name: "Bügeln") }
+
+    it "renders selects with values from records", :aggregate_failures do
+      expect(rendered_form).to have_select "Fixing keywords: Applied status", with_options: ["In Arbeit", "Fast fertig"]
+      expect(rendered_form).to have_select "Activity for logged time", with_options: ["Default", "Bügeln"], visible: :all
+    end
+  end
+
   context "for the API page" do
     subject(:rendered_form) { render_page_section(:api, 0) }
 

@@ -637,7 +637,7 @@ Redmine::MenuManager.map :admin_menu do |menu|
             parent: :settings
 
   menu.push :settings_repositories,
-            { controller: "/admin/settings/repositories_settings", action: :show },
+            { controller: "/admin/settings/pages", action: :show, settings_page: "repositories" },
             if: ->(_) { User.current.admin? },
             caption: :label_repository_plural,
             parent: :settings

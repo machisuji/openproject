@@ -202,7 +202,8 @@ module Settings
         default: nil
       },
       autofetch_changesets: {
-        default: true
+        default: true,
+        ui: { caption: -> { simple_format(t("repositories.autofetch_information")) } }
       },
       # autologin duration in days
       # 0 means autologin is disabled
@@ -328,13 +329,20 @@ module Settings
       },
       commit_fix_keywords: {
         description: "Keywords to look for in commit for fixing work packages",
-        default: "fixes,closes"
+        default: "fixes,closes",
+        ui: { label: -> { t(%i[setting_commit_fix_keywords label_keyword_plural]).join(": ") }, caption: :text_comma_separated }
       },
       commit_fix_status_id: {
         description: "Assigned status when fixing keyword is found",
         format: :integer,
         default: nil,
-        allowed: -> { Status.pluck(:id) + [nil] }
+        allowed: -> { Status.pluck(:id) + [nil] },
+        ui: {
+          input: :select_list,
+          label: -> { t(%i[setting_commit_fix_keywords label_applied_status]).join(": ") },
+          values: -> { Status.pluck(:name, :id) },
+          prompt: -> { "--- #{t(:actionview_instancetag_blank_option)} ---" }
+        }
       },
       commit_logs_encoding: {
         description: "Encoding used to convert commit logs to UTF-8",
@@ -344,7 +352,12 @@ module Settings
         description: :setting_commit_logtime_activity_id,
         format: :integer,
         default: nil,
-        allowed: -> { TimeEntryActivity.pluck(:id) + [nil] }
+        allowed: -> { TimeEntryActivity.pluck(:id) + [nil] },
+        ui: {
+          input: :select_list,
+          values: -> { TimeEntryActivity.shared.pluck(:name, :id) },
+          include_blank: -> { t(:label_default) }
+        }
       },
       commit_logtime_enabled: {
         description: "Allow logging time through commit message",
@@ -352,7 +365,8 @@ module Settings
       },
       commit_ref_keywords: {
         description: "Keywords used in commits for referencing work packages",
-        default: "refs,references,IssueID"
+        default: "refs,references,IssueID",
+        ui: { caption: :text_comma_separated }
       },
       consent_decline_mail: {
         format: :string,
@@ -573,7 +587,11 @@ module Settings
         allowed: -> { ProjectQuery.new.available_selects.map { |s| s.attribute.to_s } }
       },
       enabled_scm: {
-        default: %w[subversion git]
+        default: %w[subversion git],
+        ui: {
+          input: :check_box_group,
+          values: -> { OpenProject::SCM::Manager.registered.map { |vendor, klass| [klass.vendor_name, vendor.to_s] } }
+        }
       },
       # Allow connections for trial creation and booking
       enterprise_trial_creation_host: {
@@ -1167,25 +1185,45 @@ module Settings
       repositories_automatic_managed_vendor: {
         default: nil,
         format: :string,
-        allowed: -> { OpenProject::SCM::Manager.registered.keys.map(&:to_s) }
+        allowed: -> { OpenProject::SCM::Manager.registered.keys.map(&:to_s) },
+        ui: {
+          input: :select_list,
+          values: -> {
+            OpenProject::SCM::Manager.manageable.map do |vendor, klass|
+              [klass.vendor_name, vendor.to_s, { disabled: !klass.enabled? }]
+            end
+          },
+          include_blank: -> { t("repositories.settings.automatic_managed_repos_disabled") },
+          caption: :"repositories.settings.automatic_managed_repos_text"
+        }
       },
       # encodings used to convert repository files content to UTF-8
       # multiple values accepted, comma separated
       repositories_encodings: {
         default: nil,
-        format: :string
+        format: :string,
+        ui: { caption: :text_comma_separated }
       },
       repository_checkout_data: {
         default: {
           "git" => { "enabled" => 0 },
           "subversion" => { "enabled" => 0 }
+        },
+        ui: {
+          label: :setting_repository_checkout_display,
+          input: ->(form, _entry) {
+            form.html_content do
+              render(partial: "admin/settings/repositories_settings/repositories_checkout", locals: { f: @builder })
+            end
+          }
         }
       },
       repository_log_display_limit: {
         default: 100
       },
       repository_storage_cache_minutes: {
-        default: 720
+        default: 720,
+        ui: { caption: -> { simple_format(t("repositories.storage.update_timeout")) }, unit: :label_minute_plural }
       },
       repository_truncate_at: {
         default: 500
@@ -1482,7 +1520,8 @@ module Settings
       },
       sys_api_enabled: {
         description: "Enable internal system API for setting up managed repositories",
-        default: false
+        default: false,
+        ui: { caption: :setting_sys_api_description }
       },
       sys_api_key: {
         description: "Internal system API key for setting up managed repositories",
