@@ -149,7 +149,7 @@ Settings::Pages.draw do
     setting :first_week_of_year
   end
 
-  page :icalendar, menu_item: :icalendar, custom: true do
+  page :icalendar, menu_item: :icalendar do
     setting :ical_enabled
   end
 

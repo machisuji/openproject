@@ -1106,7 +1106,6 @@ Rails.application.routes.draw do
       end
       resource :users, controller: "/admin/settings/users_settings", only: %i[show update]
       resource :date_format, controller: "/admin/settings/date_format_settings", only: %i[show update]
-      resource :icalendar, controller: "/admin/settings/icalendar_settings", only: %i[show update]
 
       resources :project_reserved_identifiers, only: %i[index destroy] do
         collection do
