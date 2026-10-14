@@ -148,6 +148,7 @@ Naming/MethodParameterName:
     - "on"
     - "if" # conditional options, as in enabled_by_default!(if: -> { ... })
     - "if"
+    - ui # rendering hints of setting definitions, see Settings::Pages
 
 Naming/PredicatePrefix:
   ForbiddenPrefixes:

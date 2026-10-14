@@ -1542,7 +1542,8 @@ module Settings
                   :env_alias,
                   :string_values,
                   :persist_on_first_read,
-                  :secret
+                  :secret,
+                  :ui
 
     attr_writer :value,
                 :description,
@@ -1558,7 +1559,8 @@ module Settings
                    env_alias: nil,
                    string_values: false,
                    persist_on_first_read: false,
-                   secret: false)
+                   secret: false,
+                   ui: {})
       self.name = name.to_s
       self.value = derive_default default_by_env.fetch(Rails.env.to_sym, default)
       self.format = format ? format.to_sym : deduce_format(value)
@@ -1569,6 +1571,7 @@ module Settings
       self.string_values = string_values
       self.persist_on_first_read = persist_on_first_read
       self.secret = secret
+      self.ui = ui.freeze
 
       if persist_on_first_read && !writable
         raise ArgumentError, "Settings using persist_on_first_read need to be writable"
@@ -1699,6 +1702,7 @@ module Settings
       #  from the ENV OPENPROJECT_2FA as well.
       # @param [TrueClass|FalseClass] disallow_override Disables the usual possibility of overriding the value
       #   from ENV or configuration file.
+      # @param [Hash] ui Hints for rendering the setting on an administration page, see {Settings::Pages}.
       def add(name,
               default:,
               default_by_env: {},
@@ -1710,6 +1714,7 @@ module Settings
               string_values: false,
               persist_on_first_read: false,
               secret: false,
+              ui: {},
               disallow_override: false)
         name = name.to_sym
         return if exists?(name)
@@ -1724,7 +1729,8 @@ module Settings
                          env_alias:,
                          string_values:,
                          persist_on_first_read:,
-                         secret:)
+                         secret:,
+                         ui:)
         override_value(definition) unless disallow_override
         all[name] = definition
       end
