@@ -673,13 +673,13 @@ Redmine::MenuManager.map :admin_menu do |menu|
             parent: :mail_and_notifications
 
   menu.push :api_and_webhooks,
-            { controller: "/admin/settings/api_settings", action: :show },
+            { controller: "/admin/settings/pages", action: :show, settings_page: "api" },
             if: ->(_) { User.current.admin? },
             caption: :"menus.admin.api_and_webhooks",
             icon: "op-relations"
 
   menu.push :api,
-            { controller: "/admin/settings/api_settings", action: :show },
+            { controller: "/admin/settings/pages", action: :show, settings_page: "api" },
             if: ->(_) { User.current.admin? },
             caption: :label_api_access_key_type,
             parent: :api_and_webhooks

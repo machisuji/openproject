@@ -930,7 +930,6 @@ Rails.application.routes.draw do
       end
 
       resource :mail_notifications, controller: "/admin/settings/mail_notifications_settings", only: %i[show update]
-      resource :api, controller: "/admin/settings/api_settings", only: %i[show update]
       # It is important to have this named something else than "work_packages".
       # Otherwise the angular ui-router will also recognize that as a WorkPackage page and apply according classes.
       resource :work_packages_general, controller: "/admin/settings/work_packages_general", only: %i[show update]

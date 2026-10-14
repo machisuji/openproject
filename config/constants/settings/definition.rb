@@ -81,23 +81,40 @@ module Settings
         default: false
       },
       apiv3_cors_origins: {
-        default: []
+        default: [],
+        ui: {
+          caption: -> {
+            safe_join([t(:text_line_separated),
+                       link_translate(:setting_apiv3_cors_origins_instructions_html,
+                                      links: { docs_url: %i[origin_mdn_documentation] })], " ")
+          }
+        }
       },
       apiv3_docs_enabled: {
         description: "Enable interactive APIv3 documentation as part of the application",
-        default: false
+        default: false,
+        ui: { caption: :setting_apiv3_docs_enabled_instructions_warning }
       },
       apiv3_enable_basic_auth: {
         description: "Enable API token or global basic authentication for APIv3 requests",
         default: true
       },
       apiv3_max_page_size: {
-        default: 1000
+        default: 1000,
+        ui: { caption: :setting_apiv3_max_page_size_instructions, warning: :setting_apiv3_max_page_size_warning }
       },
       apiv3_write_readonly_attributes: {
         description: "Allow overriding readonly attributes (e.g. createdAt, updatedAt, author) " +
           "during the creation of resources via the REST API",
-        default: false
+        default: false,
+        ui: {
+          caption: -> {
+            safe_join([t(:setting_apiv3_write_readonly_attributes_instructions),
+                       link_translate(:setting_apiv3_write_readonly_attributes_additional_html,
+                                      links: { api_documentation_link: %i[api_docs] })], " ")
+          },
+          warning: :setting_apiv3_write_readonly_attributes_warning
+        }
       },
       app_title: {
         default: "OpenProject"
@@ -163,7 +180,8 @@ module Settings
         description: "Decide whether users can create personal API tokens in their account settings",
         # Keeping old name only for backwards-compatibility, can be removed in OpenProject 18.0
         env_alias: "OPENPROJECT_REST__API__ENABLED",
-        format: :boolean
+        format: :boolean,
+        ui: { caption: :setting_api_tokens_enabled_caption }
       },
       auth_source_sso: {
         description: "Configuration for Header-based Single Sign-On",

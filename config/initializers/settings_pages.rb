@@ -189,13 +189,19 @@ Settings::Pages.draw do
     setting :mail_handler_ignore_filenames, rows: 5
   end
 
-  page :api, menu_item: :api, custom: true do
+  page :api, menu_item: :api do
     setting :api_tokens_enabled
-    setting :apiv3_max_page_size
+    setting :apiv3_max_page_size, input_width: :xsmall, min: 50
     setting :apiv3_write_readonly_attributes
-    setting :apiv3_docs_enabled
-    setting :apiv3_cors_enabled
-    setting :apiv3_cors_origins
+
+    section :docs, heading: :setting_apiv3_docs do
+      setting :apiv3_docs_enabled
+    end
+
+    section :cors, heading: :setting_apiv3_cors_title do
+      setting :apiv3_cors_enabled
+      setting :apiv3_cors_origins, rows: 5, depends_on: { setting: :apiv3_cors_enabled }
+    end
   end
 
   page :authentication,

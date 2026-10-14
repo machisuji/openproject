@@ -140,6 +140,14 @@ RSpec.describe Settings::PageSectionForm, type: :forms do
     end
   end
 
+  context "for the API page" do
+    subject(:rendered_form) { render_page_section(:api, 0) }
+
+    it "renders a warning below the caption" do
+      expect(rendered_form).to have_css(".InlineMessage", text: "Warning:")
+    end
+  end
+
   context "for the external links page" do
     subject(:rendered_form) do
       render_section(Settings::Pages.fetch(:external_links).sections.first,
