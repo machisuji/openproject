@@ -118,4 +118,27 @@ RSpec.describe Settings::PageSectionForm, type: :forms do
       end
     end
   end
+
+  context "for the external links page" do
+    subject(:rendered_form) do
+      render_section(Settings::Pages.fetch(:external_links).sections.first,
+                     form_hook: :component_admin_settings_external_redirect)
+    end
+
+    it "renders the captions from the translation keys given as hints" do
+      expect(rendered_form).to have_field "Capture external links", type: :checkbox,
+                                                                    disabled: :all,
+                                                                    accessible_description: /redirect through a warning page/
+    end
+
+    it "calls the form hook" do
+      allow(OpenProject::Hook).to receive(:call_hook).and_call_original
+
+      rendered_form
+
+      expect(OpenProject::Hook)
+        .to have_received(:call_hook)
+        .with(:component_admin_settings_external_redirect, hash_including(:form))
+    end
+  end
 end

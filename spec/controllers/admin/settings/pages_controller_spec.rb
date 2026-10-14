@@ -34,7 +34,7 @@ RSpec.describe Admin::Settings::PagesController do
 
   current_user { user }
 
-  %w[general].each do |key|
+  %w[general external_links].each do |key|
     describe "GET #show for the #{key} page" do
       subject { get :show, params: { settings_page: key } }
 

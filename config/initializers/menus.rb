@@ -625,7 +625,7 @@ Redmine::MenuManager.map :admin_menu do |menu|
             parent: :settings
 
   menu.push :settings_external_links,
-            { controller: "/admin/settings/external_links_settings", action: :show },
+            { controller: "/admin/settings/pages", action: :show, settings_page: "external_links" },
             if: ->(_) { User.current.admin? },
             caption: :label_external_links,
             parent: :settings

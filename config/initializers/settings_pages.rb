@@ -50,7 +50,10 @@ Settings::Pages.draw do
     end
   end
 
-  page :external_links, menu_item: :settings_external_links, custom: true do
+  page :external_links,
+       menu_item: :settings_external_links,
+       enterprise_feature: :capture_external_links,
+       form_hook: :component_admin_settings_external_redirect do
     setting :capture_external_links
     setting :capture_external_links_require_login
   end
