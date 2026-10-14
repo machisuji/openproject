@@ -550,7 +550,15 @@ module Settings
       email_delivery_method: {
         format: :symbol,
         default: nil,
-        env_alias: "EMAIL_DELIVERY_METHOD"
+        env_alias: "EMAIL_DELIVERY_METHOD",
+        ui: {
+          input: :select_list,
+          values: -> { [:smtp, :sendmail, *(:letter_opener if Rails.env.development?)].map { [it.to_s, it] } },
+          include_blank: -> { t(:label_not_configured) },
+          caption: -> {
+            t(:text_email_delivery_letter_opener) if Rails.env.development? && Setting.email_delivery_method == :letter_opener
+          }
+        }
       },
       email_limit_per_day: {
         format: :integer,
@@ -564,19 +572,25 @@ module Settings
       },
       emails_salutation: {
         allowed: %i[firstname name],
-        default: :firstname
+        default: :firstname,
+        ui: {
+          input: :select_list,
+          values: -> { [[User.human_attribute_name(:firstname), :firstname], [t("mail.salutation_full_name"), :name]] }
+        }
       },
       emails_footer: {
         default: {
           "en" => ""
         },
-        string_values: true
+        string_values: true,
+        ui: { input: :multi_language_text_select }
       },
       emails_header: {
         default: {
           "en" => ""
         },
-        string_values: true
+        string_values: true,
+        ui: { input: :multi_language_text_select }
       },
       # use email address as login, hide login in registration form
       email_login: {
@@ -1381,7 +1395,8 @@ module Settings
       smtp_authentication: {
         format: :string,
         default: "plain",
-        env_alias: "SMTP_AUTHENTICATION"
+        env_alias: "SMTP_AUTHENTICATION",
+        ui: { input: :select_list, values: -> { %w[none plain login cram_md5].map { [it, it] } } }
       },
       smtp_enable_starttls_auto: {
         format: :boolean,

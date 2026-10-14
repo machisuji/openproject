@@ -163,29 +163,43 @@ Settings::Pages.draw do
     setting :journal_aggregation_time_minutes, input_width: :medium
   end
 
-  page :mail_notifications, menu_item: :mail_notifications, custom: true do
+  page :mail_notifications,
+       menu_item: :mail_notifications,
+       before_form: -> {
+         unless ActionMailer::Base.perform_deliveries
+           render(Primer::Alpha::Banner.new(mb: 3)) { t(:text_email_delivery_not_configured) }
+         end
+       },
+       after_form: -> {
+         if ActionMailer::Base.perform_deliveries
+           render(Primer::Beta::Link.new(href: test_email_admin_index_path, data: { turbo_method: :post },
+                                         font_weight: :bold, display: :block, mt: 3)) do
+             t(:label_send_test_email)
+           end
+         end
+       } do
     section :mails, heading: nil, if: -> { ActionMailer::Base.perform_deliveries } do
-      setting :mail_from
+      setting :mail_from, input_width: :medium
       setting :bcc_recipients
       setting :plain_text_mail
-      setting :emails_salutation
+      setting :emails_salutation, input_width: :medium
       setting :emails_header
       setting :emails_footer
     end
 
     section :delivery, heading: :text_setup_mail_configuration,
                        if: -> { OpenProject::Configuration["email_delivery_configuration"] != "legacy" } do
-      setting :email_delivery_method
-      setting :smtp_address
-      setting :smtp_port
-      setting :smtp_domain
-      setting :smtp_authentication
-      setting :smtp_user_name
-      setting :smtp_password
-      setting :smtp_enable_starttls_auto
-      setting :smtp_ssl
-      setting :sendmail_location
-      setting :sendmail_arguments
+      setting :email_delivery_method, input_width: :small
+      setting :smtp_address, input_width: :medium, depends_on: { setting: :email_delivery_method, value: :smtp }
+      setting :smtp_port, input_width: :xsmall, depends_on: { setting: :email_delivery_method, value: :smtp }
+      setting :smtp_domain, input_width: :medium, depends_on: { setting: :email_delivery_method, value: :smtp }
+      setting :smtp_authentication, input_width: :small, depends_on: { setting: :email_delivery_method, value: :smtp }
+      setting :smtp_user_name, input_width: :medium, depends_on: { setting: :email_delivery_method, value: :smtp }
+      setting :smtp_password, input_width: :medium, depends_on: { setting: :email_delivery_method, value: :smtp }
+      setting :smtp_enable_starttls_auto, depends_on: { setting: :email_delivery_method, value: :smtp }
+      setting :smtp_ssl, depends_on: { setting: :email_delivery_method, value: :smtp }
+      setting :sendmail_location, depends_on: { setting: :email_delivery_method, value: :sendmail }
+      setting :sendmail_arguments, depends_on: { setting: :email_delivery_method, value: :sendmail }
     end
   end
 

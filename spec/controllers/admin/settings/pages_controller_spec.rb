@@ -89,6 +89,16 @@ RSpec.describe Admin::Settings::PagesController do
       end
     end
 
+    context "with an invalid email sender" do
+      subject { patch :update, params: { settings_page: "mail_notifications", settings: { mail_from: "not an email" } } }
+
+      it "does not save it" do
+        subject
+
+        expect(flash[:error]).to include I18n.t("activerecord.errors.messages.email")
+      end
+    end
+
     context "with invalid settings" do
       subject do
         patch :update, params: { settings_page: "date_format", settings: { start_of_week: "1", first_week_of_year: "" } }
