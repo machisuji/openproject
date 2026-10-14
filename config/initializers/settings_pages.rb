@@ -153,8 +153,8 @@ Settings::Pages.draw do
     setting :ical_enabled
   end
 
-  page :aggregation, menu_item: :notification_settings, custom: true do
-    setting :journal_aggregation_time_minutes
+  page :aggregation, menu_item: :notification_settings do
+    setting :journal_aggregation_time_minutes, input_width: :medium
   end
 
   page :mail_notifications, menu_item: :mail_notifications, custom: true do

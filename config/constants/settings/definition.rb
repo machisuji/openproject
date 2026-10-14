@@ -761,7 +761,16 @@ module Settings
       },
       journal_aggregation_time_minutes: {
         default: 5,
-        allowed: 0..120
+        allowed: 0..120,
+        ui: {
+          unit: -> { t("datetime.units.minute_abbreviated", count: 2) },
+          caption: -> {
+            link_translate("admin.journal_aggregation.caption_with_maximum",
+                           i18n_args: { max: Settings::Definition[:journal_aggregation_time_minutes].allowed.max },
+                           links: { webhook_link: admin_outgoing_webhooks_path })
+          },
+          warning: -> { t("text_hint_disable_with_0") }
+        }
       },
       ldap_force_no_page: {
         description: "Force LDAP to respond as a single page, in case paged responses do not work with your server.",

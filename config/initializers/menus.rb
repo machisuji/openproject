@@ -649,13 +649,13 @@ Redmine::MenuManager.map :admin_menu do |menu|
             parent: :settings
 
   menu.push :mail_and_notifications,
-            { controller: "/admin/settings/aggregation_settings", action: :show },
+            { controller: "/admin/settings/pages", action: :show, settings_page: "aggregation" },
             if: ->(_) { User.current.admin? },
             caption: :"menus.admin.mails_and_notifications",
             icon: "mail"
 
   menu.push :notification_settings,
-            { controller: "/admin/settings/aggregation_settings", action: :show },
+            { controller: "/admin/settings/pages", action: :show, settings_page: "aggregation" },
             if: ->(_) { User.current.admin? },
             caption: :"menus.admin.aggregation",
             parent: :mail_and_notifications
