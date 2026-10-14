@@ -1101,7 +1101,6 @@ Rails.application.routes.draw do
       resource :working_days_and_hours, controller: "/admin/settings/working_days_and_hours_settings", only: %i[show update] do
         post :confirm_changes
       end
-      resource :users, controller: "/admin/settings/users_settings", only: %i[show update]
 
       resources :project_reserved_identifiers, only: %i[index destroy] do
         collection do

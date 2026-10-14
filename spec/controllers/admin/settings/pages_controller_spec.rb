@@ -89,6 +89,18 @@ RSpec.describe Admin::Settings::PagesController do
       end
     end
 
+    context "when resetting the consent time" do
+      subject { patch :update, params: { settings_page: "users", settings: { consent_time: "1" } } }
+
+      it "sets it to now" do
+        freeze_time do
+          subject
+
+          expect(Setting.consent_time).to eq Time.current
+        end
+      end
+    end
+
     context "with an invalid email sender" do
       subject { patch :update, params: { settings_page: "mail_notifications", settings: { mail_from: "not an email" } } }
 

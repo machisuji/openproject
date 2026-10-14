@@ -370,20 +370,33 @@ module Settings
       },
       consent_decline_mail: {
         format: :string,
-        default: nil
+        default: nil,
+        ui: { caption: :"consent.contact_mail_instructions" }
       },
       # Time after which users have to have consented to what ever they need to consent
       # to (depending on other settings) such as a privacy policy.
       consent_time: {
         default: nil,
-        format: :datetime
+        format: :datetime,
+        ui: {
+          input: :check_box,
+          checked: -> { Setting.consent_time.blank? },
+          caption: -> {
+            update_time = Setting.consent_time.present? ? format_time(Setting.consent_time) : t(:label_never)
+            safe_join([t("consent.text_update_consent_time"), tag.br,
+                       tag.strong(t("consent.update_consent_last_time", update_time:))])
+          },
+          # Checking the box asks users to consent again, so it sets the time to now instead of storing a flag.
+          parse: ->(value) { value == "1" ? Time.zone.now.iso8601 : Setting.consent_time&.iso8601 }
+        }
       },
       # Additional info about what the user is consenting to (optional).
       consent_info: {
         default: {
           en: "## Consent\n\nYou need to agree to the [privacy and security policy]" +
             "(https://www.openproject.org/data-privacy-and-security/) of this OpenProject instance."
-        }
+        },
+        ui: { input: :multi_language_text_select }
       },
       # Indicates whether or not users need to consent to something such as privacy policy.
       consent_required: {
@@ -432,7 +445,8 @@ module Settings
       },
       default_auto_hide_popups: {
         description: "Whether to automatically hide success notifications by default",
-        default: true
+        default: true,
+        ui: { label: -> { UserPreference.human_attribute_name(:auto_hide_popups) } }
       },
       # user configuration
       default_comment_sort_order: {
@@ -445,7 +459,11 @@ module Settings
       },
       default_language: {
         default: "en",
-        allowed: -> { Redmine::I18n.all_languages }
+        allowed: -> { Redmine::I18n.all_languages },
+        ui: {
+          input: :select_list,
+          values: -> { all_languages.map { translate_language(it) }.sort_by(&:first) }
+        }
       },
       default_projects_modules: {
         default: -> { OpenProject::AccessControl.default_project_modules.map(&:to_s) },
@@ -1562,7 +1580,21 @@ module Settings
       user_default_timezone: {
         default: nil,
         format: :string,
-        allowed: ActiveSupport::TimeZone.all.map { |tz| tz.tzinfo.canonical_identifier }.sort.uniq + [nil]
+        allowed: ActiveSupport::TimeZone.all.map { |tz| tz.tzinfo.canonical_identifier }.sort.uniq + [nil],
+        ui: {
+          input: :select_list,
+          include_blank: true,
+          caption: :tooltip_user_default_timezone,
+          values: -> {
+            UserPreferences::UpdateContract
+              .assignable_time_zones
+              .group_by { it.tzinfo.canonical_zone }
+              .map do |canonical_zone, zones|
+                offset = ActiveSupport::TimeZone.seconds_to_utc_offset(canonical_zone.base_utc_offset)
+                ["(UTC#{offset}) #{zones.map(&:name).join(', ')}", canonical_zone.identifier]
+              end
+          }
+        }
       },
       users_deletable_by_admins: {
         default: false
@@ -1584,7 +1616,11 @@ module Settings
       },
       user_format: {
         default: :firstname_lastname,
-        allowed: -> { User::USER_FORMATS_STRUCTURE.keys }
+        allowed: -> { User::USER_FORMATS_STRUCTURE.keys },
+        ui: {
+          input: :select_list,
+          values: -> { User::USER_FORMATS_STRUCTURE.keys.map { [User.current.name(it), it] } }
+        }
       },
       web: {
         description: "Web worker count and threads configuration",

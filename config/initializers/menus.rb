@@ -353,7 +353,7 @@ Redmine::MenuManager.map :admin_menu do |menu|
             icon: "people"
 
   menu.push :user_settings,
-            { controller: "/admin/settings/users_settings", action: :show },
+            { controller: "/admin/settings/pages", action: :show, settings_page: "users" },
             if: ->(_) { User.current.admin? },
             caption: :label_users_settings,
             parent: :users_and_permissions

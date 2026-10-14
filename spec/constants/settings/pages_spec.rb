@@ -37,6 +37,7 @@ RSpec.describe Settings::Pages do
         feeds_limit: :number_field,
         app_title: :text_field,
         antivirus_scan_action: :radio_button_group,
+        default_language: :select_list,
         working_days: :check_box_group,
         allowed_link_protocols: :text_area
       }.each do |name, input|

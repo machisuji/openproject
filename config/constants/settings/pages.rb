@@ -40,7 +40,9 @@ module Settings
   # the first auto-rendered one getting a route. Lambdas given as `before_form` and
   # `after_form` render additional content around the form in the view
   # context. Custom pages render themselves and are
-  # registered so their settings can be found in the settings search. Several
+  # registered so their settings can be found in the settings search. A
+  # `title` translation key replaces the menu entry's caption as the page
+  # title. Several
   # pages may share a menu entry, e.g. one per tab (`tab:` and `label:`) or
   # served by another controller (`url:`).
   #
@@ -231,7 +233,7 @@ module Settings
       attr_reader :key, :menu_item, :tab, :label, :sections, :enterprise_feature, :enterprise_banner, :form_hook,
                   :view_hook, :before_form, :after_form, :form_data
 
-      def initialize(key, menu_item:, custom: false, tab: nil, label: nil, url: nil,
+      def initialize(key, menu_item:, custom: false, tab: nil, label: nil, title: nil, url: nil, # rubocop:disable Metrics/AbcSize
                      update_service: nil, enterprise_feature: nil, enterprise_banner: {}, form_hook: nil,
                      view_hook: nil, before_form: nil, after_form: nil, form_data: -> { {} }, **options)
         @key = key
@@ -239,6 +241,7 @@ module Settings
         @custom = custom
         @tab = tab
         @label = label
+        @title = title
         @url = url
         @update_service = update_service
         @enterprise_feature = enterprise_feature
@@ -254,6 +257,10 @@ module Settings
 
       def custom?
         @custom
+      end
+
+      def title(menu = Pages.admin_menu)
+        @title ? I18n.t(@title) : menu_node(menu).caption
       end
 
       def visible?

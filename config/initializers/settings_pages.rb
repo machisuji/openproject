@@ -91,17 +91,32 @@ Settings::Pages.draw do
     end
   end
 
-  page :users, menu_item: :user_settings, custom: true do
-    setting :default_language
-    setting :user_default_timezone
-    setting :default_auto_hide_popups, label: :"activerecord.attributes.user_preference.auto_hide_popups"
-    setting :user_format
-    setting :user_can_change_email
-    setting :users_deletable_by_admins
-    setting :users_deletable_by_self
-    setting :consent_required
-    setting :consent_info
-    setting :consent_decline_mail
+  page :users, menu_item: :user_settings, title: :label_user_settings do
+    section :default_preferences, heading: :"settings.user.default_preferences" do
+      setting :default_language, input_width: :medium
+      setting :user_default_timezone, input_width: :large
+      setting :default_auto_hide_popups
+    end
+
+    section :display_format, heading: :"settings.user.display_format" do
+      setting :user_format, input_width: :medium
+    end
+
+    section :account, heading: :"settings.user.account" do
+      setting :user_can_change_email
+    end
+
+    section :deletion, heading: :"settings.user.deletion" do
+      setting :users_deletable_by_admins
+      setting :users_deletable_by_self
+    end
+
+    section :consent, heading: :label_consent_settings do
+      setting :consent_required
+      setting :consent_info
+      setting :consent_time
+      setting :consent_decline_mail, input_width: :medium, type: :email
+    end
   end
 
   page :work_packages_general, menu_item: :work_packages_general, custom: true do

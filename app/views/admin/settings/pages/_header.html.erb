@@ -29,17 +29,16 @@ See COPYRIGHT and LICENSE files for more details.
 
 <%# locals: (settings_page:) %>
 
-<% menu_node = settings_page.menu_node %>
-<% html_title t(:label_administration), menu_node.caption %>
+<% html_title t(:label_administration), settings_page.title %>
 
 <%=
   render(Primer::OpenProject::PageHeader.new) do |header|
-    header.with_title { menu_node.caption }
+    header.with_title { settings_page.title }
     header.with_breadcrumbs(
       [
         { href: admin_index_path, text: t("label_administration") },
         *settings_page.menu_ancestors.map { |node| { href: url_for(node.url), text: node.caption, skip_for_mobile: true } },
-        menu_node.caption
+        settings_page.title
       ]
     )
 
