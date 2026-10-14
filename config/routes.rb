@@ -909,6 +909,13 @@ Rails.application.routes.draw do
 
   namespace :admin do
     namespace :settings do
+      Settings::Pages.routed.each do |settings_page|
+        resource settings_page.key,
+                 controller: "/admin/settings/pages",
+                 only: %i[show update],
+                 settings_page: settings_page.key.to_s
+      end
+
       resource :general, controller: "/admin/settings/general_settings", only: %i[show update]
       resource :languages, controller: "/admin/settings/languages_settings", only: %i[show update]
       resource :external_links, controller: "/admin/settings/external_links_settings", only: %i[show update]
