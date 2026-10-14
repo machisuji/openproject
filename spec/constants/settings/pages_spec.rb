@@ -45,12 +45,25 @@ RSpec.describe Settings::Pages do
         end
       end
 
+      it "prefers an input given in the definition's ui hints" do
+        expect(described_class.new(:welcome_text).input).to eq :rich_text_area
+      end
+
       it "prefers an input given on the page over the definition's ui hints" do
         expect(described_class.new(:welcome_text, input: :text_area).input).to eq :text_area
       end
 
       it "fails for formats it cannot derive an input for" do
         expect { described_class.new(:fog).input }.to raise_error(ArgumentError, /fog/)
+      end
+    end
+
+    describe "#input_options" do
+      it "merges the page hints over the definition's ui hints, dropping its own hints" do
+        entry = described_class.new(:activity_days_default, input_width: :xsmall)
+
+        expect(entry.input_options).to eq(input_width: :xsmall)
+        expect(entry.ui).to include(unit: :label_day_plural, input_width: :xsmall)
       end
     end
 
@@ -75,6 +88,11 @@ RSpec.describe Settings::Pages do
     end
 
     describe "#parse_param" do
+      it "splits arrays entered as text into lines and applies the parse hint" do
+        expect(described_class.new(:allowed_link_protocols).parse_param("FTP\r\n\r\ns ftp \n"))
+          .to eq %w[ftp sftp]
+      end
+
       it "keeps other values" do
         expect(described_class.new(:app_title).parse_param("Title")).to eq "Title"
       end

@@ -29,22 +29,25 @@
 #++
 
 Settings::Pages.draw do
-  page :general, menu_item: :settings_general, custom: true do
-    setting :app_title
-    setting :organization_name
-    setting :per_page_options
-    setting :activity_days_default
-    setting :host_name
+  page :general, menu_item: :settings_general, view_hook: :view_settings_general_form do
+    setting :app_title, input_width: :medium
+    setting :organization_name, input_width: :medium
+    setting :per_page_options, input_width: :medium
+    setting :activity_days_default, input_width: :xsmall
+    setting :host_name, input_width: :medium
     setting :cache_formatted_text
-    setting :allowed_link_protocols
+    setting :allowed_link_protocols, input_width: :medium, rows: 5
     setting :feeds_enabled
-    setting :feeds_limit
-    setting :file_max_size_displayed
-    setting :diff_max_lines_displayed
+    setting :feeds_limit, input_width: :xsmall
+    setting :file_max_size_displayed, input_width: :xsmall
+    setting :diff_max_lines_displayed, input_width: :xsmall
     setting :security_badge_displayed, if: -> { OpenProject::Configuration.security_badge_displayed? }
-    setting :welcome_title
-    setting :welcome_text
-    setting :welcome_on_homescreen
+
+    section :welcome, heading: :setting_welcome_text do
+      setting :welcome_title, input_width: :medium
+      setting :welcome_text, cols: 60, rows: 5, id: "settings_welcome_text", rich_text_options: {}
+      setting :welcome_on_homescreen
+    end
   end
 
   page :external_links, menu_item: :settings_external_links, custom: true do
