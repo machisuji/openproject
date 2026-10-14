@@ -908,29 +908,26 @@ Rails.application.routes.draw do
   end
 
   namespace :admin do
-    namespace :settings do
-      resource :general, controller: "/admin/settings/general_settings", only: %i[show update]
-      resource :languages, controller: "/admin/settings/languages_settings", only: %i[show update]
-      resource :external_links, controller: "/admin/settings/external_links_settings", only: %i[show update]
-      resource :exports, controller: "/admin/settings/exports_settings", only: %i[show update]
-      resource :repositories, controller: "/admin/settings/repositories_settings", only: %i[show update]
-      resource :experimental, controller: "/admin/settings/experimental_settings", only: %i[show update]
+    resource :settings_search, only: :show do
+      get :tree
+    end
 
-      resource :authentication, controller: "/admin/settings/authentication_settings", only: %i[show update]
-      resource :attachments, controller: "/admin/settings/attachments_settings", only: %i[show update]
-      resource :virus_scanning, controller: "/admin/settings/virus_scanning_settings", only: %i[show update] do
-        collection do
-          post :av_form
-        end
+    namespace :settings do
+      Settings::Pages.routed.each do |settings_page|
+        resource settings_page.key,
+                 controller: "/admin/settings/pages",
+                 only: %i[show update],
+                 settings_page: settings_page.key.to_s
       end
 
-      resource :incoming_mails, controller: "/admin/settings/incoming_mails_settings", only: %i[show update]
-      resource :aggregation, controller: "/admin/settings/aggregation_settings", only: %i[show update]
-      resource :mail_notifications, controller: "/admin/settings/mail_notifications_settings", only: %i[show update]
-      resource :api, controller: "/admin/settings/api_settings", only: %i[show update]
-      # It is important to have this named something else than "work_packages".
-      # Otherwise the angular ui-router will also recognize that as a WorkPackage page and apply according classes.
-      resource :work_packages_general, controller: "/admin/settings/work_packages_general", only: %i[show update]
+      resource :experimental, controller: "/admin/settings/experimental_settings", only: %i[show update]
+
+      resource :authentication_sso,
+               controller: "/admin/settings/authentication_settings",
+               path: "authentication/sso",
+               only: %i[show update]
+      resource :virus_scanning, controller: "/admin/settings/virus_scanning_settings", only: %i[show update]
+
       resource :work_packages_identifier, controller: "/admin/settings/work_packages_identifier", only: %i[show update] do
         get :status, on: :member
         get :confirm_dialog, on: :member, defaults: { format: :turbo_stream }
@@ -948,7 +945,6 @@ Rails.application.routes.draw do
 
       resource :progress_tracking, controller: "/admin/settings/progress_tracking", only: %i[show update]
       resource :projects, controller: "/admin/settings/projects_settings", only: %i[show update]
-      resource :new_project, controller: "/admin/settings/new_project_settings", only: %i[show update]
       resources :project_phase_definitions,
                 controller: "/admin/settings/project_phase_definitions",
                 except: :show do
@@ -1101,9 +1097,6 @@ Rails.application.routes.draw do
       resource :working_days_and_hours, controller: "/admin/settings/working_days_and_hours_settings", only: %i[show update] do
         post :confirm_changes
       end
-      resource :users, controller: "/admin/settings/users_settings", only: %i[show update]
-      resource :date_format, controller: "/admin/settings/date_format_settings", only: %i[show update]
-      resource :icalendar, controller: "/admin/settings/icalendar_settings", only: %i[show update]
 
       resources :project_reserved_identifiers, only: %i[index destroy] do
         collection do

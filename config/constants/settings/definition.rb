@@ -36,17 +36,22 @@ module Settings
 
     DEFINITIONS = { # rubocop:disable Metrics/CollectionLiteralLength
       activity_days_default: {
-        default: 30
+        default: 30,
+        ui: { unit: :label_day_plural }
       },
       after_first_login_redirect_url: {
         format: :string,
         description: "URL users logging in for the first time will be redirected to (e.g., a help screen)",
-        default: nil
+        default: nil,
+        ui: { caption: :setting_after_first_login_redirect_url_text_html }
       },
       after_login_default_redirect_url: {
         description: "Override URL to which logged in users are redirected instead of the Home page",
         format: :string,
-        default: nil
+        default: nil,
+        ui: {
+          caption: -> { t(:setting_after_login_default_redirect_url_example_html, example_code: content_tag(:code, "/my/page")) }
+        }
       },
       ai_text_transform_actions_enabled: {
         description: "Enable AI text transform actions in the rich text editor",
@@ -62,30 +67,58 @@ module Settings
       allowed_link_protocols: {
         format: :array,
         description: "Allowed protocols for links in the WYSIWYG editor and formatted texts",
-        default: []
+        default: [],
+        ui: {
+          caption: -> {
+            t(:setting_allowed_link_protocols_text_html,
+              tel_code: tag.code("tel"),
+              element_code: tag.code("element"),
+              http_code: tag.code("http"),
+              https_code: tag.code("https"),
+              mailto_code: tag.code("mailto"))
+          },
+          parse: ->(protocols) { protocols.map { it.strip.downcase.gsub(/[^a-z0-9+\-.]+/, "") } }
+        }
       },
       apiv3_cors_enabled: {
         description: "Enable CORS headers for APIv3 server responses",
         default: false
       },
       apiv3_cors_origins: {
-        default: []
+        default: [],
+        ui: {
+          caption: -> {
+            safe_join([t(:text_line_separated),
+                       link_translate(:setting_apiv3_cors_origins_instructions_html,
+                                      links: { docs_url: %i[origin_mdn_documentation] })], " ")
+          }
+        }
       },
       apiv3_docs_enabled: {
         description: "Enable interactive APIv3 documentation as part of the application",
-        default: false
+        default: false,
+        ui: { caption: :setting_apiv3_docs_enabled_instructions_warning }
       },
       apiv3_enable_basic_auth: {
         description: "Enable API token or global basic authentication for APIv3 requests",
         default: true
       },
       apiv3_max_page_size: {
-        default: 1000
+        default: 1000,
+        ui: { caption: :setting_apiv3_max_page_size_instructions, warning: :setting_apiv3_max_page_size_warning }
       },
       apiv3_write_readonly_attributes: {
         description: "Allow overriding readonly attributes (e.g. createdAt, updatedAt, author) " +
           "during the creation of resources via the REST API",
-        default: false
+        default: false,
+        ui: {
+          caption: -> {
+            safe_join([t(:setting_apiv3_write_readonly_attributes_instructions),
+                       link_translate(:setting_apiv3_write_readonly_attributes_additional_html,
+                                      links: { api_documentation_link: %i[api_docs] })], " ")
+          },
+          warning: :setting_apiv3_write_readonly_attributes_warning
+        }
       },
       app_title: {
         default: "OpenProject"
@@ -99,11 +132,18 @@ module Settings
         default: "utf-8"
       },
       attachment_max_size: {
-        default: 5120
+        default: 5120,
+        ui: {
+          unit: :"number.human.storage_units.units.kb",
+          caption: -> { t("settings.attachments.attachment_max_size_env_caption") unless Setting.attachment_max_size_writable? }
+        }
       },
       # Existing setting
       attachment_whitelist: {
-        default: []
+        default: [],
+        ui: {
+          caption: -> { t("settings.attachments.whitelist_text_html", ext_example: "*.jpg", mime_example: "image/jpeg") }
+        }
       },
       ##
       # Carrierwave storage type. Possible values are, among others, :file and :fog.
@@ -151,7 +191,8 @@ module Settings
         description: "Decide whether users can create personal API tokens in their account settings",
         # Keeping old name only for backwards-compatibility, can be removed in OpenProject 18.0
         env_alias: "OPENPROJECT_REST__API__ENABLED",
-        format: :boolean
+        format: :boolean,
+        ui: { caption: :setting_api_tokens_enabled_caption }
       },
       auth_source_sso: {
         description: "Configuration for Header-based Single Sign-On",
@@ -172,14 +213,22 @@ module Settings
         default: nil
       },
       autofetch_changesets: {
-        default: true
+        default: true,
+        ui: { caption: -> { simple_format(t("repositories.autofetch_information")) } }
       },
       # autologin duration in days
       # 0 means autologin is disabled
       autologin: {
         format: :integer,
         default: 0,
-        allowed: [1, 7, 14, 30, 60, 90, 365]
+        allowed: [1, 7, 14, 30, 60, 90, 365],
+        ui: {
+          input: :select_list,
+          values: -> {
+            [[t(:label_disabled), 0],
+             *Settings::Definition[:autologin].allowed.map { [t("datetime.distance_in_words.x_days", count: it), it] }]
+          }
+        }
       },
       autologin_cookie_name: {
         description: "Cookie name for autologin cookie",
@@ -194,7 +243,21 @@ module Settings
         # Manually managed list with languages that have ~50+ translation ratio in Crowdin
         # https://crowdin.com/project/openproject
         default: %w[ca cs de el en es fr hu id it ja ko lt nl no pl pt-BR pt-PT ro ru sk sl sv tr uk vi zh-CN zh-TW].freeze,
-        allowed: -> { Redmine::I18n.all_languages }
+        allowed: -> { Redmine::I18n.all_languages },
+        ui: {
+          values: -> {
+            all_languages.map { translate_language(it) }.sort_by(&:first).map do |name, code|
+              if code == Setting.default_language
+                [t(:"settings.language_name_being_default", language_name: name), code,
+                 { label_arguments: { lang: code }, disabled: true, checked: true }]
+              else
+                [name, code, { label_arguments: { lang: code } }]
+              end
+            end
+          },
+          # The default language is always available, but its disabled check box is not submitted.
+          parse: ->(languages) { languages | [Setting.default_language] }
+        }
       },
       avatar_link_expiration_seconds: {
         description: "Cache duration for avatar image API responses",
@@ -243,11 +306,13 @@ module Settings
       },
       brute_force_block_minutes: {
         description: "Number of minutes to block users after presumed brute force attack",
-        default: 30
+        default: 30,
+        ui: { caption: -> { t("text_hint_disable_with_0") }, unit: :label_minute_plural }
       },
       brute_force_block_after_failed_logins: {
         description: "Number of login attempts per user before assuming brute force attack",
-        default: 20
+        default: 20,
+        ui: { caption: -> { t("text_hint_disable_with_0") } }
       },
       cache_expires_in_seconds: {
         description: "Expiration time for memcache entries, empty for no expiration be default",
@@ -284,13 +349,20 @@ module Settings
       },
       commit_fix_keywords: {
         description: "Keywords to look for in commit for fixing work packages",
-        default: "fixes,closes"
+        default: "fixes,closes",
+        ui: { label: -> { t(%i[setting_commit_fix_keywords label_keyword_plural]).join(": ") }, caption: :text_comma_separated }
       },
       commit_fix_status_id: {
         description: "Assigned status when fixing keyword is found",
         format: :integer,
         default: nil,
-        allowed: -> { Status.pluck(:id) + [nil] }
+        allowed: -> { Status.pluck(:id) + [nil] },
+        ui: {
+          input: :select_list,
+          label: -> { t(%i[setting_commit_fix_keywords label_applied_status]).join(": ") },
+          values: -> { Status.pluck(:name, :id) },
+          prompt: -> { "--- #{t(:actionview_instancetag_blank_option)} ---" }
+        }
       },
       commit_logs_encoding: {
         description: "Encoding used to convert commit logs to UTF-8",
@@ -300,7 +372,12 @@ module Settings
         description: :setting_commit_logtime_activity_id,
         format: :integer,
         default: nil,
-        allowed: -> { TimeEntryActivity.pluck(:id) + [nil] }
+        allowed: -> { TimeEntryActivity.pluck(:id) + [nil] },
+        ui: {
+          input: :select_list,
+          values: -> { TimeEntryActivity.shared.pluck(:name, :id) },
+          include_blank: -> { t(:label_default) }
+        }
       },
       commit_logtime_enabled: {
         description: "Allow logging time through commit message",
@@ -308,24 +385,38 @@ module Settings
       },
       commit_ref_keywords: {
         description: "Keywords used in commits for referencing work packages",
-        default: "refs,references,IssueID"
+        default: "refs,references,IssueID",
+        ui: { caption: :text_comma_separated }
       },
       consent_decline_mail: {
         format: :string,
-        default: nil
+        default: nil,
+        ui: { caption: :"consent.contact_mail_instructions" }
       },
       # Time after which users have to have consented to what ever they need to consent
       # to (depending on other settings) such as a privacy policy.
       consent_time: {
         default: nil,
-        format: :datetime
+        format: :datetime,
+        ui: {
+          input: :check_box,
+          checked: -> { Setting.consent_time.blank? },
+          caption: -> {
+            update_time = Setting.consent_time.present? ? format_time(Setting.consent_time) : t(:label_never)
+            safe_join([t("consent.text_update_consent_time"), tag.br,
+                       tag.strong(t("consent.update_consent_last_time", update_time:))])
+          },
+          # Checking the box asks users to consent again, so it sets the time to now instead of storing a flag.
+          parse: ->(value) { value == "1" ? Time.zone.now.iso8601 : Setting.consent_time&.iso8601 }
+        }
       },
       # Additional info about what the user is consenting to (optional).
       consent_info: {
         default: {
           en: "## Consent\n\nYou need to agree to the [privacy and security policy]" +
             "(https://www.openproject.org/data-privacy-and-security/) of this OpenProject instance."
-        }
+        },
+        ui: { input: :multi_language_text_select }
       },
       # Indicates whether or not users need to consent to something such as privacy policy.
       consent_required: {
@@ -336,6 +427,7 @@ module Settings
       },
       csv_escape_formulas: {
         default: true,
+        ui: { caption: :setting_csv_escape_formulas_text },
         description: "Escapes cells with single quote in CSV exports that begin with a spreadsheet formula character (e.g., =,@)"
       },
       database_cipher_key: {
@@ -348,6 +440,11 @@ module Settings
       date_format: {
         format: :string,
         default: nil,
+        ui: {
+          input: :select_list,
+          values: -> { Settings::Definition[:date_format].allowed.map { [Date.current.strftime(it), it] } },
+          include_blank: -> { t(:label_language_based) }
+        },
         allowed: [
           "%Y-%m-%d",
           "%d/%m/%Y",
@@ -368,7 +465,8 @@ module Settings
       },
       default_auto_hide_popups: {
         description: "Whether to automatically hide success notifications by default",
-        default: true
+        default: true,
+        ui: { label: -> { UserPreference.human_attribute_name(:auto_hide_popups) } }
       },
       # user configuration
       default_comment_sort_order: {
@@ -381,11 +479,22 @@ module Settings
       },
       default_language: {
         default: "en",
-        allowed: -> { Redmine::I18n.all_languages }
+        allowed: -> { Redmine::I18n.all_languages },
+        ui: {
+          input: :select_list,
+          values: -> { all_languages.map { translate_language(it) }.sort_by(&:first) }
+        }
       },
       default_projects_modules: {
         default: -> { OpenProject::AccessControl.default_project_modules.map(&:to_s) },
-        allowed: -> { OpenProject::AccessControl.available_project_modules.map(&:to_s) }
+        allowed: -> { OpenProject::AccessControl.available_project_modules.map(&:to_s) },
+        ui: {
+          values: -> {
+            OpenProject::AccessControl.available_project_modules(sorted: true).map do |project_module|
+              [t("project_module_#{project_module}", default: project_module.to_s.humanize), project_module.to_s]
+            end
+          }
+        }
       },
       default_projects_public: {
         default: false
@@ -486,7 +595,15 @@ module Settings
       email_delivery_method: {
         format: :symbol,
         default: nil,
-        env_alias: "EMAIL_DELIVERY_METHOD"
+        env_alias: "EMAIL_DELIVERY_METHOD",
+        ui: {
+          input: :select_list,
+          values: -> { [:smtp, :sendmail, *(:letter_opener if Rails.env.development?)].map { [it.to_s, it] } },
+          include_blank: -> { t(:label_not_configured) },
+          caption: -> {
+            t(:text_email_delivery_letter_opener) if Rails.env.development? && Setting.email_delivery_method == :letter_opener
+          }
+        }
       },
       email_limit_per_day: {
         format: :integer,
@@ -500,19 +617,25 @@ module Settings
       },
       emails_salutation: {
         allowed: %i[firstname name],
-        default: :firstname
+        default: :firstname,
+        ui: {
+          input: :select_list,
+          values: -> { [[User.human_attribute_name(:firstname), :firstname], [t("mail.salutation_full_name"), :name]] }
+        }
       },
       emails_footer: {
         default: {
           "en" => ""
         },
-        string_values: true
+        string_values: true,
+        ui: { input: :multi_language_text_select }
       },
       emails_header: {
         default: {
           "en" => ""
         },
-        string_values: true
+        string_values: true,
+        ui: { input: :multi_language_text_select }
       },
       # use email address as login, hide login in registration form
       email_login: {
@@ -523,7 +646,11 @@ module Settings
         allowed: -> { ProjectQuery.new.available_selects.map { |s| s.attribute.to_s } }
       },
       enabled_scm: {
-        default: %w[subversion git]
+        default: %w[subversion git],
+        ui: {
+          input: :check_box_group,
+          values: -> { OpenProject::SCM::Manager.registered.map { |vendor, klass| [klass.vendor_name, vendor.to_s] } }
+        }
       },
       # Allow connections for trial creation and booking
       enterprise_trial_creation_host: {
@@ -550,12 +677,22 @@ module Settings
       # Maximum size of files that can be displayed
       # inline through the file viewer (in KB)
       file_max_size_displayed: {
-        default: 512
+        default: 512,
+        ui: { unit: :"number.human.storage_units.units.kb" }
       },
       first_week_of_year: {
         default: nil,
         format: :integer,
-        allowed: [1, 4]
+        allowed: [1, 4],
+        ui: {
+          input: :select_list,
+          values: -> { [[day_name(1), 1], [day_name(4), 4]] },
+          include_blank: -> { t(:label_language_based) },
+          caption: -> {
+            t("settings.date_format.first_week_of_year_text_html",
+              link: OpenProject::Static::Links.url_for(:date_format_settings_documentation))
+          }
+        }
       },
       fog: {
         description: "Configure fog, e.g. when using an S3 uploader",
@@ -635,7 +772,8 @@ module Settings
         default_by_env: {
           # We do not want to set a localhost host name in production
           production: nil
-        }
+        },
+        ui: { caption: -> { "#{t(:label_example)}: #{request.host_with_port}" } }
       },
       additional_host_names: {
         description: "Additional allowed host names for the application.",
@@ -728,11 +866,21 @@ module Settings
         default: true
       },
       invitation_expiration_days: {
-        default: 7
+        default: 7,
+        ui: { unit: -> { t("datetime.units.day.other") } }
       },
       journal_aggregation_time_minutes: {
         default: 5,
-        allowed: 0..120
+        allowed: 0..120,
+        ui: {
+          unit: -> { t("datetime.units.minute_abbreviated", count: 2) },
+          caption: -> {
+            link_translate("admin.journal_aggregation.caption_with_maximum",
+                           i18n_args: { max: Settings::Definition[:journal_aggregation_time_minutes].allowed.max },
+                           links: { webhook_link: admin_outgoing_webhooks_path })
+          },
+          warning: -> { t("text_hint_disable_with_0") }
+        }
       },
       ldap_force_no_page: {
         description: "Force LDAP to respond as a single page, in case paged responses do not work with your server.",
@@ -810,13 +958,16 @@ module Settings
         secret: true
       },
       mail_handler_body_delimiters: {
-        default: ""
+        default: "",
+        ui: { input: :text_area, caption: :text_line_separated }
       },
       mail_handler_body_delimiter_regex: {
-        default: ""
+        default: "",
+        ui: { caption: :text_regexp_multiline }
       },
       mail_handler_ignore_filenames: {
-        default: "signature.asc"
+        default: "signature.asc",
+        ui: { input: :text_area, caption: :"incoming_mails.ignore_filenames" }
       },
       mail_suffix_separators: {
         default: "+"
@@ -843,7 +994,23 @@ module Settings
       new_project_user_role_id: {
         format: :integer,
         default: nil,
-        allowed: -> { Role.pluck(:id) }
+        allowed: -> { Role.pluck(:id) },
+        ui: {
+          input: :select_list,
+          include_blank: false,
+          # The configured role is listed even when it lost the permissions required to be assignable
+          # to project creators, so that admins see and can change the current selection.
+          values: -> {
+            assignable = ProjectRole.assignable_to_project_creator.to_a
+            configured = ProjectRole.givable.find_by(id: Setting.new_project_user_role_id)
+
+            options = assignable.map { [it.name, it.id] }
+            if configured && assignable.exclude?(configured)
+              options << [t(:label_role_missing_permissions, role: configured.name), configured.id]
+            end
+            options
+          }
+        }
       },
       new_project_send_confirmation_email: {
         format: :boolean,
@@ -851,7 +1018,15 @@ module Settings
       },
       new_project_notification_text: {
         format: :string,
-        default: ""
+        default: "",
+        ui: {
+          input: :rich_text_area,
+          required: true,
+          value: -> {
+            Setting.new_project_notification_text.presence || t("admin.settings.new_project.notification_text_default")
+          },
+          rich_text_options: { showAttachments: false, editorType: "constrained" }
+        }
       },
       notifications_hidden: {
         default: false
@@ -886,13 +1061,17 @@ module Settings
         default_by_env: {
           test: []
         },
-        allowed: %w[lowercase uppercase numeric special]
+        allowed: %w[lowercase uppercase numeric special],
+        ui: {
+          values: -> { OpenProject::Passwords::Evaluator.known_rules.map { [t("label_password_rule_#{it}"), it] } }
+        }
       },
       password_count_former_banned: {
         default: 0
       },
       password_days_valid: {
-        default: 0
+        default: 0,
+        ui: { caption: -> { t("text_hint_disable_with_0") } }
       },
       password_login: {
         description: "Who may authenticate with a password: all users, everyone except OmniAuth-linked " \
@@ -932,7 +1111,10 @@ module Settings
       # Requires a migration to be written
       # replace Setting#per_page_options_array
       per_page_options: {
-        default: "20, 100"
+        default: "20, 100",
+        ui: {
+          caption: -> { safe_join([t(:text_comma_separated), t(:text_notice_too_many_values_are_inperformant)], tag.br) }
+        }
       },
       percent_complete_on_status_closed: {
         description: "Describes how % complete should change when setting a work package status to a closed one",
@@ -968,7 +1150,8 @@ module Settings
         description: "Show work package attachments by default.",
         format: :boolean,
         default: true,
-        writable: true
+        writable: true,
+        ui: { caption: :"settings.attachments.show_work_package_attachments" }
       },
       https: {
         description: "Set assumed connection security for the Rails processes",
@@ -1048,7 +1231,8 @@ module Settings
       registration_footer: {
         default: {
           "en" => ""
-        }
+        },
+        ui: { input: :multi_language_text_select }
       },
       registration_rate_limit: {
         format: :integer,
@@ -1091,25 +1275,45 @@ module Settings
       repositories_automatic_managed_vendor: {
         default: nil,
         format: :string,
-        allowed: -> { OpenProject::SCM::Manager.registered.keys.map(&:to_s) }
+        allowed: -> { OpenProject::SCM::Manager.registered.keys.map(&:to_s) },
+        ui: {
+          input: :select_list,
+          values: -> {
+            OpenProject::SCM::Manager.manageable.map do |vendor, klass|
+              [klass.vendor_name, vendor.to_s, { disabled: !klass.enabled? }]
+            end
+          },
+          include_blank: -> { t("repositories.settings.automatic_managed_repos_disabled") },
+          caption: :"repositories.settings.automatic_managed_repos_text"
+        }
       },
       # encodings used to convert repository files content to UTF-8
       # multiple values accepted, comma separated
       repositories_encodings: {
         default: nil,
-        format: :string
+        format: :string,
+        ui: { caption: :text_comma_separated }
       },
       repository_checkout_data: {
         default: {
           "git" => { "enabled" => 0 },
           "subversion" => { "enabled" => 0 }
+        },
+        ui: {
+          label: :setting_repository_checkout_display,
+          input: ->(form, _entry) {
+            form.html_content do
+              render(partial: "admin/settings/repositories_settings/repositories_checkout", locals: { f: @builder })
+            end
+          }
         }
       },
       repository_log_display_limit: {
         default: 100
       },
       repository_storage_cache_minutes: {
-        default: 720
+        default: 720,
+        ui: { caption: -> { simple_format(t("repositories.storage.update_timeout")) }, unit: :label_minute_plural }
       },
       repository_truncate_at: {
         default: 500
@@ -1141,7 +1345,15 @@ module Settings
       },
       # Display update / security badge, enabled by default
       security_badge_displayed: {
-        default: true
+        default: true,
+        ui: {
+          caption: -> {
+            t(:text_notice_security_badge_displayed_html,
+              information_panel_label: t(:label_information),
+              more_info_url: ::OpenProject::Static::Links.url_for(:security_badge_documentation),
+              information_panel_path: info_admin_index_path)
+          }
+        }
       },
       security_badge_url: {
         description: "URL of the update check badge",
@@ -1199,7 +1411,21 @@ module Settings
       },
       self_registration: {
         default: 2,
-        format: :integer
+        format: :integer,
+        ui: {
+          input: :radio_button_group,
+          values: -> { Setting::SelfRegistration::VALUES.map { |name, value| { name:, value: } } },
+          button_options: { data: { action: "admin--registration#updateWarningVisibility" } },
+          caption: -> {
+            safe_join([
+                        t(:setting_self_registration_caption),
+                        render(Primer::Alpha::Banner.new(scheme: :warning,
+                                                         data: { admin__registration_target: "warningToast" },
+                                                         hidden: !Setting::SelfRegistration.unsupervised_registration?,
+                                                         my: 2)) { t(:setting_self_registration_warning) }
+                      ])
+          }
+        }
       },
       sendmail_arguments: {
         description: "Arguments to call sendmail with in case it is configured as outgoing email setup",
@@ -1227,7 +1453,8 @@ module Settings
         default: false
       },
       session_ttl: {
-        default: 120
+        default: 120,
+        ui: { caption: :setting_session_ttl_hint, unit: :label_minute_plural }
       },
       show_community_links: {
         description: "Enable or disable links to OpenProject community instances",
@@ -1259,7 +1486,8 @@ module Settings
       smtp_authentication: {
         format: :string,
         default: "plain",
-        env_alias: "SMTP_AUTHENTICATION"
+        env_alias: "SMTP_AUTHENTICATION",
+        ui: { input: :select_list, values: -> { %w[none plain login cram_md5].map { [it, it] } } }
       },
       smtp_enable_starttls_auto: {
         format: :boolean,
@@ -1370,7 +1598,12 @@ module Settings
       start_of_week: {
         default: nil,
         format: :integer,
-        allowed: [1, 6, 7]
+        allowed: [1, 6, 7],
+        ui: {
+          input: :select_list,
+          values: -> { [[day_name(1), 1], [day_name(6), 6], [day_name(7), 7]] },
+          include_blank: -> { t(:label_language_based) }
+        }
       },
       statsd: {
         description: "enable statsd metrics (currently puma only) by configuring host",
@@ -1393,7 +1626,8 @@ module Settings
       },
       sys_api_enabled: {
         description: "Enable internal system API for setting up managed repositories",
-        default: false
+        default: false,
+        ui: { caption: :setting_sys_api_description }
       },
       sys_api_key: {
         description: "Internal system API key for setting up managed repositories",
@@ -1406,6 +1640,11 @@ module Settings
       time_format: {
         format: :string,
         default: nil,
+        ui: {
+          input: :select_list,
+          values: -> { Settings::Definition[:time_format].allowed.map { [Time.current.strftime(it), it] } },
+          include_blank: -> { t(:label_language_based) }
+        },
         allowed: [
           "%H:%M",
           "%I:%M %p"
@@ -1414,7 +1653,21 @@ module Settings
       user_default_timezone: {
         default: nil,
         format: :string,
-        allowed: ActiveSupport::TimeZone.all.map { |tz| tz.tzinfo.canonical_identifier }.sort.uniq + [nil]
+        allowed: ActiveSupport::TimeZone.all.map { |tz| tz.tzinfo.canonical_identifier }.sort.uniq + [nil],
+        ui: {
+          input: :select_list,
+          include_blank: true,
+          caption: :tooltip_user_default_timezone,
+          values: -> {
+            UserPreferences::UpdateContract
+              .assignable_time_zones
+              .group_by { it.tzinfo.canonical_zone }
+              .map do |canonical_zone, zones|
+                offset = ActiveSupport::TimeZone.seconds_to_utc_offset(canonical_zone.base_utc_offset)
+                ["(UTC#{offset}) #{zones.map(&:name).join(', ')}", canonical_zone.identifier]
+              end
+          }
+        }
       },
       users_deletable_by_admins: {
         default: false
@@ -1436,7 +1689,11 @@ module Settings
       },
       user_format: {
         default: :firstname_lastname,
-        allowed: -> { User::USER_FORMATS_STRUCTURE.keys }
+        allowed: -> { User::USER_FORMATS_STRUCTURE.keys },
+        ui: {
+          input: :select_list,
+          values: -> { User::USER_FORMATS_STRUCTURE.keys.map { [User.current.name(it), it] } }
+        }
       },
       web: {
         description: "Web worker count and threads configuration",
@@ -1452,7 +1709,8 @@ module Settings
       },
       welcome_text: {
         format: :string,
-        default: nil
+        default: nil,
+        ui: { input: :rich_text_area }
       },
       welcome_title: {
         format: :string,
@@ -1483,7 +1741,8 @@ module Settings
         allowed: 1000..10_000
       },
       work_packages_projects_export_limit: {
-        default: 500
+        default: 500,
+        ui: { caption: :setting_work_packages_projects_export_limit_text }
       },
       work_packages_bulk_request_limit: {
         default: 10
@@ -1501,16 +1760,44 @@ module Settings
         default: ["status", "priority", "due_date"],
         allowed: -> {
           Query.available_columns(nil).select(&:highlightable).map(&:name).map(&:to_s)
+        },
+        ui: {
+          values: -> { Query.available_columns(nil).select(&:highlightable).map { [it.caption, it.name.to_s] } }
         }
       },
       work_package_list_default_highlighting_mode: {
         format: :string,
         default: -> { "inline" },
-        allowed: -> { Query::QUERY_HIGHLIGHTING_MODES.map(&:to_s) }
+        allowed: -> { Query::QUERY_HIGHLIGHTING_MODES.map(&:to_s) },
+        ui: {
+          input: :select_list,
+          values: -> { Query::Highlighting::QUERY_HIGHLIGHTING_MODES.map { [t("settings.highlighting.mode_long.#{it}"), it.to_s] } }
+        }
       },
       work_package_list_default_columns: {
         default: %w[id subject type status assigned_to priority],
-        allowed: -> { Query.new.displayable_columns.map { |c| c.name.to_s } }
+        allowed: -> { Query.new.displayable_columns.map { |c| c.name.to_s } },
+        ui: {
+          label: :setting_column_options,
+          input: ->(form, _entry) {
+            view = @view_context
+            form.html_content do
+              view.content_tag(:div, data: { setting_name: "work_package_list_default_columns" }) do
+                view.angular_component_tag "opce-draggable-autocompleter",
+                                           inputs: {
+                                             options: view.work_packages_columns_options,
+                                             selected: view.selected_work_packages_columns_options,
+                                             protected: view.protected_work_packages_columns_options,
+                                             name: "settings[work_package_list_default_columns][]",
+                                             id: "setting_column_options",
+                                             inputLabel: view.t(:"queries.configure_view.columns.input_label"),
+                                             inputPlaceholder: view.t(:"queries.configure_view.columns.input_placeholder"),
+                                             dragAreaLabel: view.t(:"queries.configure_view.columns.drag_area_label")
+                                           }
+              end
+            end
+          }
+        }
       },
       work_package_startdate_is_adddate: {
         default: false
@@ -1528,11 +1815,13 @@ module Settings
       capture_external_links: {
         description: "Redirect external links through a warning page before leaving the application",
         default: false,
+        ui: { caption: :setting_capture_external_links_text },
         writable: -> { EnterpriseToken.allows_to?(:capture_external_links) }
       },
       capture_external_links_require_login: {
         description: "Require users to be logged in before being able to navigate to external links",
         default: false,
+        ui: { caption: :setting_capture_external_links_require_login_text },
         writable: -> { EnterpriseToken.allows_to?(:capture_external_links) }
       }
     }.freeze
@@ -1542,7 +1831,8 @@ module Settings
                   :env_alias,
                   :string_values,
                   :persist_on_first_read,
-                  :secret
+                  :secret,
+                  :ui
 
     attr_writer :value,
                 :description,
@@ -1558,7 +1848,8 @@ module Settings
                    env_alias: nil,
                    string_values: false,
                    persist_on_first_read: false,
-                   secret: false)
+                   secret: false,
+                   ui: {})
       self.name = name.to_s
       self.value = derive_default default_by_env.fetch(Rails.env.to_sym, default)
       self.format = format ? format.to_sym : deduce_format(value)
@@ -1569,6 +1860,7 @@ module Settings
       self.string_values = string_values
       self.persist_on_first_read = persist_on_first_read
       self.secret = secret
+      self.ui = ui.freeze
 
       if persist_on_first_read && !writable
         raise ArgumentError, "Settings using persist_on_first_read need to be writable"
@@ -1699,6 +1991,7 @@ module Settings
       #  from the ENV OPENPROJECT_2FA as well.
       # @param [TrueClass|FalseClass] disallow_override Disables the usual possibility of overriding the value
       #   from ENV or configuration file.
+      # @param [Hash] ui Hints for rendering the setting on an administration page, see {Settings::Pages}.
       def add(name,
               default:,
               default_by_env: {},
@@ -1710,6 +2003,7 @@ module Settings
               string_values: false,
               persist_on_first_read: false,
               secret: false,
+              ui: {},
               disallow_override: false)
         name = name.to_sym
         return if exists?(name)
@@ -1724,7 +2018,8 @@ module Settings
                          env_alias:,
                          string_values:,
                          persist_on_first_read:,
-                         secret:)
+                         secret:,
+                         ui:)
         override_value(definition) unless disallow_override
         all[name] = definition
       end

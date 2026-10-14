@@ -1,0 +1,70 @@
+<%#-- copyright
+OpenProject is an open source project management software.
+Copyright (C) the OpenProject GmbH
+
+This program is free software; you can redistribute it and/or
+modify it under the terms of the GNU General Public License version 3.
+
+OpenProject is a fork of ChiliProject, which is a fork of Redmine. The copyright follows:
+Copyright (C) 2006-2013 Jean-Philippe Lang
+Copyright (C) 2010-2013 the ChiliProject Team
+
+This program is free software; you can redistribute it and/or
+modify it under the terms of the GNU General Public License
+as published by the Free Software Foundation; either version 2
+of the License, or (at your option) any later version.
+
+This program is distributed in the hope that it will be useful,
+but WITHOUT ANY WARRANTY; without even the implied warranty of
+MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+GNU General Public License for more details.
+
+You should have received a copy of the GNU General Public License
+along with this program; if not, write to the Free Software
+Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
+
+See COPYRIGHT and LICENSE files for more details.
+
+++#%>
+
+<%= render "admin/settings/pages/header", settings_page: %>
+
+<% if settings_page.enterprise_feature %>
+  <%= render(EnterpriseEdition::BannerComponent.new(settings_page.enterprise_feature, **settings_page.enterprise_banner)) %>
+<% end %>
+
+<%= instance_exec(&settings_page.before_form) if settings_page.before_form %>
+
+<% form_data = instance_exec(&settings_page.form_data) %>
+
+<%=
+  settings_primer_form_with(
+    url: url_for(settings_page.url),
+    scope: :settings,
+    method: :patch,
+    data: {
+      **form_data,
+      controller: ["show-when-checked show-when-value-selected", form_data[:controller]].compact.join(" ")
+    }
+  ) do |f|
+%>
+  <% settings_page.sections.each_with_index do |section, index| %>
+    <%
+      section_form = Settings::PageSectionForm.new(
+        f,
+        section:,
+        form_hook: (settings_page.form_hook if index.zero?),
+        dependency_causes: settings_page.dependency_causes
+      )
+    %>
+    <% if section == settings_page.sections.last %>
+      <%= render(Primer::Forms::FormList.new(section_form, Admin::Settings::Save.new(f, disabled: !settings_page.writable?))) %>
+    <% else %>
+      <%= render(section_form) %>
+    <% end %>
+
+    <%= call_hook(settings_page.view_hook) if settings_page.view_hook && index.zero? %>
+  <% end %>
+<% end %>
+
+<%= instance_exec(&settings_page.after_form) if settings_page.after_form %>

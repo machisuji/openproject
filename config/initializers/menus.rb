@@ -353,7 +353,7 @@ Redmine::MenuManager.map :admin_menu do |menu|
             icon: "people"
 
   menu.push :user_settings,
-            { controller: "/admin/settings/users_settings", action: :show },
+            { controller: "/admin/settings/pages", action: :show, settings_page: "users" },
             if: ->(_) { User.current.admin? },
             caption: :label_users_settings,
             parent: :users_and_permissions
@@ -421,13 +421,13 @@ Redmine::MenuManager.map :admin_menu do |menu|
             parent: :users_and_permissions
 
   menu.push :admin_work_packages,
-            { controller: "/admin/settings/work_packages_general", action: :show },
+            { controller: "/admin/settings/pages", action: :show, settings_page: "work_packages_general" },
             if: ->(_) { User.current.admin? },
             caption: :label_work_package_plural,
             icon: "op-view-list"
 
   menu.push :work_packages_general,
-            { controller: "/admin/settings/work_packages_general", action: :show },
+            { controller: "/admin/settings/pages", action: :show, settings_page: "work_packages_general" },
             if: ->(_) { User.current.admin? },
             caption: :label_general,
             parent: :admin_work_packages
@@ -513,7 +513,7 @@ Redmine::MenuManager.map :admin_menu do |menu|
             parent: :admin_projects_settings
 
   menu.push :new_project_settings,
-            { controller: "/admin/settings/new_project_settings", action: :show },
+            { controller: "/admin/settings/pages", action: :show, settings_page: "new_project" },
             if: ->(_) { User.current.admin? },
             caption: :label_project_new,
             parent: :admin_projects_settings
@@ -595,49 +595,49 @@ Redmine::MenuManager.map :admin_menu do |menu|
             parent: :calendars_and_dates
 
   menu.push :date_format,
-            { controller: "/admin/settings/date_format_settings", action: :show },
+            { controller: "/admin/settings/pages", action: :show, settings_page: "date_format" },
             if: ->(_) { User.current.admin? },
             caption: :label_date_format,
             parent: :calendars_and_dates
 
   menu.push :icalendar,
-            { controller: "/admin/settings/icalendar_settings", action: :show },
+            { controller: "/admin/settings/pages", action: :show, settings_page: "icalendar" },
             if: ->(_) { User.current.admin? },
             caption: :label_calendar_subscriptions,
             parent: :calendars_and_dates
 
   menu.push :settings,
-            { controller: "/admin/settings/general_settings", action: :show },
+            { controller: "/admin/settings/pages", action: :show, settings_page: "general" },
             if: ->(_) { User.current.admin? },
             caption: :label_system_settings,
             icon: "gear"
 
   menu.push :settings_general,
-            { controller: "/admin/settings/general_settings", action: :show },
+            { controller: "/admin/settings/pages", action: :show, settings_page: "general" },
             if: ->(_) { User.current.admin? },
             caption: :label_general,
             parent: :settings
 
   menu.push :settings_languages,
-            { controller: "/admin/settings/languages_settings", action: :show },
+            { controller: "/admin/settings/pages", action: :show, settings_page: "languages" },
             if: ->(_) { User.current.admin? },
             caption: :label_languages,
             parent: :settings
 
   menu.push :settings_external_links,
-            { controller: "/admin/settings/external_links_settings", action: :show },
+            { controller: "/admin/settings/pages", action: :show, settings_page: "external_links" },
             if: ->(_) { User.current.admin? },
             caption: :label_external_links,
             parent: :settings
 
   menu.push :settings_exports,
-            { controller: "/admin/settings/exports_settings", action: :show },
+            { controller: "/admin/settings/pages", action: :show, settings_page: "exports" },
             if: ->(_) { User.current.admin? },
             caption: :label_export_plural,
             parent: :settings
 
   menu.push :settings_repositories,
-            { controller: "/admin/settings/repositories_settings", action: :show },
+            { controller: "/admin/settings/pages", action: :show, settings_page: "repositories" },
             if: ->(_) { User.current.admin? },
             caption: :label_repository_plural,
             parent: :settings
@@ -649,49 +649,49 @@ Redmine::MenuManager.map :admin_menu do |menu|
             parent: :settings
 
   menu.push :mail_and_notifications,
-            { controller: "/admin/settings/aggregation_settings", action: :show },
+            { controller: "/admin/settings/pages", action: :show, settings_page: "aggregation" },
             if: ->(_) { User.current.admin? },
             caption: :"menus.admin.mails_and_notifications",
             icon: "mail"
 
   menu.push :notification_settings,
-            { controller: "/admin/settings/aggregation_settings", action: :show },
+            { controller: "/admin/settings/pages", action: :show, settings_page: "aggregation" },
             if: ->(_) { User.current.admin? },
             caption: :"menus.admin.aggregation",
             parent: :mail_and_notifications
 
   menu.push :mail_notifications,
-            { controller: "/admin/settings/mail_notifications_settings", action: :show },
+            { controller: "/admin/settings/pages", action: :show, settings_page: "mail_notifications" },
             if: ->(_) { User.current.admin? },
             caption: :"menus.admin.mail_notification",
             parent: :mail_and_notifications
 
   menu.push :incoming_mails,
-            { controller: "/admin/settings/incoming_mails_settings", action: :show },
+            { controller: "/admin/settings/pages", action: :show, settings_page: "incoming_mails" },
             if: ->(_) { User.current.admin? },
             caption: :label_incoming_emails,
             parent: :mail_and_notifications
 
   menu.push :api_and_webhooks,
-            { controller: "/admin/settings/api_settings", action: :show },
+            { controller: "/admin/settings/pages", action: :show, settings_page: "api" },
             if: ->(_) { User.current.admin? },
             caption: :"menus.admin.api_and_webhooks",
             icon: "op-relations"
 
   menu.push :api,
-            { controller: "/admin/settings/api_settings", action: :show },
+            { controller: "/admin/settings/pages", action: :show, settings_page: "api" },
             if: ->(_) { User.current.admin? },
             caption: :label_api_access_key_type,
             parent: :api_and_webhooks
 
   menu.push :authentication,
-            { controller: "/admin/settings/authentication_settings", action: :show },
+            { controller: "/admin/settings/pages", action: :show, settings_page: "authentication" },
             if: ->(_) { User.current.admin? },
             caption: :label_authentication,
             icon: "shield-lock"
 
   menu.push :authentication_settings,
-            { controller: "/admin/settings/authentication_settings", action: :show },
+            { controller: "/admin/settings/pages", action: :show, settings_page: "authentication" },
             if: ->(_) { User.current.admin? },
             caption: :"authentication.login_and_registration",
             parent: :authentication

@@ -135,7 +135,7 @@ RSpec.describe "User settings administration", :js do
       within_fieldset "User Consent" do
         expect(page).to have_unchecked_field "Consent required"
         expect(consent_info_editor.editor_element).to have_text("agree to the privacy and security policy")
-        expect(page).to have_checked_field "toggle_consent_time"
+        expect(page).to have_checked_field "settings[consent_time]"
         expect(page).to have_text "Last update of consent: Never"
         expect(page).to have_field "Consent contact mail address", with: ""
 
@@ -156,7 +156,7 @@ RSpec.describe "User settings administration", :js do
         select "Deutsch", from: "Consent information text"
         expect(consent_info_editor.editor_element).to have_text("Bitte stimmen Sie den neuen Bedingungen zu.", exact: true)
 
-        expect(page).to have_unchecked_field "toggle_consent_time"
+        expect(page).to have_unchecked_field "settings[consent_time]"
         expect(page).to have_no_text "Last update of consent: Never"
         expect(page).to have_field "Consent contact mail address", with: "privacy@example.com"
       end
