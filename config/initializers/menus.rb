@@ -631,7 +631,7 @@ Redmine::MenuManager.map :admin_menu do |menu|
             parent: :settings
 
   menu.push :settings_exports,
-            { controller: "/admin/settings/exports_settings", action: :show },
+            { controller: "/admin/settings/pages", action: :show, settings_page: "exports" },
             if: ->(_) { User.current.admin? },
             caption: :label_export_plural,
             parent: :settings

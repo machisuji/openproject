@@ -62,8 +62,8 @@ Settings::Pages.draw do
     setting :available_languages
   end
 
-  page :exports, menu_item: :settings_exports, custom: true do
-    setting :work_packages_projects_export_limit
+  page :exports, menu_item: :settings_exports do
+    setting :work_packages_projects_export_limit, input_width: :xsmall
     setting :csv_escape_formulas
   end
 

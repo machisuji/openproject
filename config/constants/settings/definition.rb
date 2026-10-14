@@ -362,6 +362,7 @@ module Settings
       },
       csv_escape_formulas: {
         default: true,
+        ui: { caption: :setting_csv_escape_formulas_text },
         description: "Escapes cells with single quote in CSV exports that begin with a spreadsheet formula character (e.g., =,@)"
       },
       database_cipher_key: {
@@ -1523,7 +1524,8 @@ module Settings
         allowed: 1000..10_000
       },
       work_packages_projects_export_limit: {
-        default: 500
+        default: 500,
+        ui: { caption: :setting_work_packages_projects_export_limit_text }
       },
       work_packages_bulk_request_limit: {
         default: 10
