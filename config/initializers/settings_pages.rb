@@ -183,10 +183,10 @@ Settings::Pages.draw do
     end
   end
 
-  page :incoming_mails, menu_item: :incoming_mails, custom: true do
-    setting :mail_handler_body_delimiters
+  page :incoming_mails, menu_item: :incoming_mails do
+    setting :mail_handler_body_delimiters, rows: 5
     setting :mail_handler_body_delimiter_regex
-    setting :mail_handler_ignore_filenames
+    setting :mail_handler_ignore_filenames, rows: 5
   end
 
   page :api, menu_item: :api, custom: true do

@@ -667,7 +667,7 @@ Redmine::MenuManager.map :admin_menu do |menu|
             parent: :mail_and_notifications
 
   menu.push :incoming_mails,
-            { controller: "/admin/settings/incoming_mails_settings", action: :show },
+            { controller: "/admin/settings/pages", action: :show, settings_page: "incoming_mails" },
             if: ->(_) { User.current.admin? },
             caption: :label_incoming_emails,
             parent: :mail_and_notifications

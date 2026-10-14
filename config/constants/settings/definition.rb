@@ -848,13 +848,16 @@ module Settings
         secret: true
       },
       mail_handler_body_delimiters: {
-        default: ""
+        default: "",
+        ui: { input: :text_area, caption: :text_line_separated }
       },
       mail_handler_body_delimiter_regex: {
-        default: ""
+        default: "",
+        ui: { caption: :text_regexp_multiline }
       },
       mail_handler_ignore_filenames: {
-        default: "signature.asc"
+        default: "signature.asc",
+        ui: { input: :text_area, caption: :"incoming_mails.ignore_filenames" }
       },
       mail_suffix_separators: {
         default: "+"
