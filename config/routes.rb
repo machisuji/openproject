@@ -908,7 +908,9 @@ Rails.application.routes.draw do
   end
 
   namespace :admin do
-    resource :settings_search, only: :show
+    resource :settings_search, only: :show do
+      get :tree
+    end
 
     namespace :settings do
       Settings::Pages.routed.each do |settings_page|
