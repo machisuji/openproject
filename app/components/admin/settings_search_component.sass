@@ -39,3 +39,14 @@
     display: flex
     max-height: 100%
     flex-basis: 100%
+
+@keyframes op-setting-highlight-fade
+  to
+    background-color: transparent
+    box-shadow: none
+
+.op-setting--highlighted
+  border-radius: var(--borderRadius-medium)
+  background-color: var(--bgColor-attention-muted)
+  box-shadow: 0 0 0 var(--base-size-8) var(--bgColor-attention-muted)
+  animation: op-setting-highlight-fade 1s ease-out 3s forwards
