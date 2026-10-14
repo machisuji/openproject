@@ -945,7 +945,6 @@ Rails.application.routes.draw do
 
       resource :progress_tracking, controller: "/admin/settings/progress_tracking", only: %i[show update]
       resource :projects, controller: "/admin/settings/projects_settings", only: %i[show update]
-      resource :new_project, controller: "/admin/settings/new_project_settings", only: %i[show update]
       resources :project_phase_definitions,
                 controller: "/admin/settings/project_phase_definitions",
                 except: :show do
