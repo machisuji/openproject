@@ -375,6 +375,11 @@ module Settings
       date_format: {
         format: :string,
         default: nil,
+        ui: {
+          input: :select_list,
+          values: -> { Settings::Definition[:date_format].allowed.map { [Date.current.strftime(it), it] } },
+          include_blank: -> { t(:label_language_based) }
+        },
         allowed: [
           "%Y-%m-%d",
           "%d/%m/%Y",
@@ -583,7 +588,16 @@ module Settings
       first_week_of_year: {
         default: nil,
         format: :integer,
-        allowed: [1, 4]
+        allowed: [1, 4],
+        ui: {
+          input: :select_list,
+          values: -> { [[day_name(1), 1], [day_name(4), 4]] },
+          include_blank: -> { t(:label_language_based) },
+          caption: -> {
+            t("settings.date_format.first_week_of_year_text_html",
+              link: OpenProject::Static::Links.url_for(:date_format_settings_documentation))
+          }
+        }
       },
       fog: {
         description: "Configure fog, e.g. when using an S3 uploader",
@@ -1422,7 +1436,12 @@ module Settings
       start_of_week: {
         default: nil,
         format: :integer,
-        allowed: [1, 6, 7]
+        allowed: [1, 6, 7],
+        ui: {
+          input: :select_list,
+          values: -> { [[day_name(1), 1], [day_name(6), 6], [day_name(7), 7]] },
+          include_blank: -> { t(:label_language_based) }
+        }
       },
       statsd: {
         description: "enable statsd metrics (currently puma only) by configuring host",
@@ -1458,6 +1477,11 @@ module Settings
       time_format: {
         format: :string,
         default: nil,
+        ui: {
+          input: :select_list,
+          values: -> { Settings::Definition[:time_format].allowed.map { [Time.current.strftime(it), it] } },
+          include_blank: -> { t(:label_language_based) }
+        },
         allowed: [
           "%H:%M",
           "%I:%M %p"

@@ -142,11 +142,11 @@ Settings::Pages.draw do
     setting :working_days
   end
 
-  page :date_format, menu_item: :date_format, custom: true do
-    setting :date_format
-    setting :time_format
-    setting :start_of_week
-    setting :first_week_of_year
+  page :date_format, menu_item: :date_format do
+    setting :date_format, input_width: :medium
+    setting :time_format, input_width: :medium
+    setting :start_of_week, input_width: :medium
+    setting :first_week_of_year, input_width: :medium
   end
 
   page :icalendar, menu_item: :icalendar do

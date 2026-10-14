@@ -595,7 +595,7 @@ Redmine::MenuManager.map :admin_menu do |menu|
             parent: :calendars_and_dates
 
   menu.push :date_format,
-            { controller: "/admin/settings/date_format_settings", action: :show },
+            { controller: "/admin/settings/pages", action: :show, settings_page: "date_format" },
             if: ->(_) { User.current.admin? },
             caption: :label_date_format,
             parent: :calendars_and_dates

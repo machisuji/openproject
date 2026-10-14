@@ -89,6 +89,20 @@ RSpec.describe Admin::Settings::PagesController do
       end
     end
 
+    context "with invalid settings" do
+      subject do
+        patch :update, params: { settings_page: "date_format", settings: { start_of_week: "1", first_week_of_year: "" } }
+      end
+
+      it "redirects back to the page with the validation error", :aggregate_failures do
+        subject
+
+        expect(response).to redirect_to admin_settings_date_format_path
+        expect(flash[:error]).to include I18n.t(:setting_first_week_of_year)
+        expect(Setting.start_of_week).to be_nil
+      end
+    end
+
     context "with settings not shown on the page" do
       let(:settings) { { app_title: "Renamed", login_required: "0" } }
 
