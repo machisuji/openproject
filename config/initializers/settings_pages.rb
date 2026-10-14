@@ -119,12 +119,19 @@ Settings::Pages.draw do
     end
   end
 
-  page :work_packages_general, menu_item: :work_packages_general, custom: true do
+  # It is important to have this named something else than "work_packages".
+  # Otherwise the angular ui-router will also recognize that as a WorkPackage page and apply according classes.
+  page :work_packages_general, menu_item: :work_packages_general do
     setting :cross_project_work_package_relations
     setting :display_subprojects_work_packages
     setting :work_package_startdate_is_adddate
-    setting :work_package_list_default_highlighting_mode
-    setting :work_package_list_default_highlighted_attributes
+    setting :work_package_list_default_highlighting_mode, input_width: :medium
+    setting :work_package_list_default_highlighted_attributes,
+            depends_on: { setting: :work_package_list_default_highlighting_mode, value: "inline" }
+
+    section :columns, heading: :setting_column_options do
+      setting :work_package_list_default_columns, form_field: false
+    end
   end
 
   page :work_packages_identifier, menu_item: :work_packages_identifier, custom: true do

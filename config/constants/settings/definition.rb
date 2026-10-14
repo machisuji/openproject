@@ -1687,16 +1687,44 @@ module Settings
         default: ["status", "priority", "due_date"],
         allowed: -> {
           Query.available_columns(nil).select(&:highlightable).map(&:name).map(&:to_s)
+        },
+        ui: {
+          values: -> { Query.available_columns(nil).select(&:highlightable).map { [it.caption, it.name.to_s] } }
         }
       },
       work_package_list_default_highlighting_mode: {
         format: :string,
         default: -> { "inline" },
-        allowed: -> { Query::QUERY_HIGHLIGHTING_MODES.map(&:to_s) }
+        allowed: -> { Query::QUERY_HIGHLIGHTING_MODES.map(&:to_s) },
+        ui: {
+          input: :select_list,
+          values: -> { Query::Highlighting::QUERY_HIGHLIGHTING_MODES.map { [t("settings.highlighting.mode_long.#{it}"), it.to_s] } }
+        }
       },
       work_package_list_default_columns: {
         default: %w[id subject type status assigned_to priority],
-        allowed: -> { Query.new.displayable_columns.map { |c| c.name.to_s } }
+        allowed: -> { Query.new.displayable_columns.map { |c| c.name.to_s } },
+        ui: {
+          label: :setting_column_options,
+          input: ->(form, _entry) {
+            view = @view_context
+            form.html_content do
+              view.content_tag(:div, data: { setting_name: "work_package_list_default_columns" }) do
+                view.angular_component_tag "opce-draggable-autocompleter",
+                                           inputs: {
+                                             options: view.work_packages_columns_options,
+                                             selected: view.selected_work_packages_columns_options,
+                                             protected: view.protected_work_packages_columns_options,
+                                             name: "settings[work_package_list_default_columns][]",
+                                             id: "setting_column_options",
+                                             inputLabel: view.t(:"queries.configure_view.columns.input_label"),
+                                             inputPlaceholder: view.t(:"queries.configure_view.columns.input_placeholder"),
+                                             dragAreaLabel: view.t(:"queries.configure_view.columns.drag_area_label")
+                                           }
+              end
+            end
+          }
+        }
       },
       work_package_startdate_is_adddate: {
         default: false

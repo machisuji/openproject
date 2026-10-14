@@ -928,9 +928,6 @@ Rails.application.routes.draw do
         end
       end
 
-      # It is important to have this named something else than "work_packages".
-      # Otherwise the angular ui-router will also recognize that as a WorkPackage page and apply according classes.
-      resource :work_packages_general, controller: "/admin/settings/work_packages_general", only: %i[show update]
       resource :work_packages_identifier, controller: "/admin/settings/work_packages_identifier", only: %i[show update] do
         get :status, on: :member
         get :confirm_dialog, on: :member, defaults: { format: :turbo_stream }
