@@ -216,7 +216,8 @@ module Settings
       end
     end
 
-    def multi_language_text_select(name:, current_language: I18n.locale.to_s)
+    def multi_language_text_select(name:, current_language: I18n.locale.to_s, label: setting_label(name),
+                                   caption: setting_caption(name), **)
       object.group(data: { controller: "admin--multi-lang-text-setting" }) do |group|
         # Add select list to switch
         group.select_list(
@@ -224,15 +225,15 @@ module Settings
           input_width: :small,
           id: "lang-for-#{name}",
           class: "lang-select-switch",
-          label: setting_label(name),
-          caption: setting_caption(name),
+          label:,
+          caption:,
           include_blank: false,
           data: { admin__multi_lang_text_setting_target: "select" }
         ) do |select|
-          lang_options_for_select(false).each do |label, value|
+          lang_options_for_select(false).each do |option_label, value|
             select.option(
               value:,
-              label:,
+              label: option_label,
               selected: value == current_language
             )
           end
