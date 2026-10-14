@@ -49,15 +49,6 @@ See COPYRIGHT and LICENSE files for more details.
   ) do |f|
 %>
   <% settings_page.sections.each_with_index do |section, index| %>
-    <% if section.heading %>
-      <%=
-        render(Primer::Beta::Subhead.new(mt: 3)) do |component|
-          component.with_heading(tag: :h3, size: :medium) { t(section.heading) }
-          component.with_description { t(section.description) } if section.description
-        end
-      %>
-    <% end %>
-
     <%
       section_form = Settings::PageSectionForm.new(
         f,

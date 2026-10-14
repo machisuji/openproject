@@ -39,16 +39,32 @@ module Settings
     settings_form do |sf|
       helpers.call_hook(form_hook, form: sf) if form_hook
 
-      section.visible_entries.each do |entry|
-        if entry.depends_on
-          sf.group(**dependent_group_options(entry.depends_on)) { render_entry(it, entry) }
-        else
-          render_entry(sf, entry)
-        end
+      if section.heading
+        sf.fieldset_group(**fieldset_options) { render_entries(it) }
+      else
+        render_entries(sf)
       end
     end
 
     private
+
+    def render_entries(form)
+      section.visible_entries.each do |entry|
+        if entry.depends_on
+          form.group(**dependent_group_options(entry.depends_on)) { render_entry(it, entry) }
+        else
+          render_entry(form, entry)
+        end
+      end
+    end
+
+    def fieldset_options
+      {
+        title: I18n.t(section.heading),
+        description: (I18n.t(section.description) if section.description),
+        mt: 3
+      }.compact
+    end
 
     def render_entry(form, entry)
       return instance_exec(form, entry, &entry.input) if entry.input.is_a?(Proc)
